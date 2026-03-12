@@ -18,6 +18,7 @@ import {debounceTime, switchMap, tap} from 'rxjs/operators';
  * favorite issues, delegates selected issue to parent component.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-issue-picker-cloud',
   templateUrl: './issue-picker-cloud.component.html',
   styleUrls: ['./issue-picker-cloud.component.scss'],

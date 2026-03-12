@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
  * Smart component, contains login, lost connection, and error modals and handles login and reconnect actions.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-connection-issue-resolver',
   templateUrl: './connection-issue-resolver.component.html',
   styleUrls: ['./connection-issue-resolver.component.scss']

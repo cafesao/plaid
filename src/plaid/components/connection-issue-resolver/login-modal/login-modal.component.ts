@@ -6,6 +6,7 @@ import {HttpErrorResponse} from '@angular/common/http';
  * Dumb component, presents login modal and delegates actions to parent component.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-login-modal',
   templateUrl: './login-modal.component.html',
   styleUrls: ['./login-modal.component.scss', '../connection-issue-resolver.component.scss'],

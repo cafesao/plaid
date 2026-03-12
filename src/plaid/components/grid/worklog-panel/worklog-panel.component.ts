@@ -20,6 +20,7 @@ import {AuthFacade} from '../../../core/auth/auth.facade';
  * entry. Makes use of its own service to manage visual aspects of all class instances at once.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-worklog-panel',
   templateUrl: './worklog-panel.component.html',
   styleUrls: ['./worklog-panel.component.scss'],

@@ -17,6 +17,7 @@ import {WorklogFacade} from '../../core/worklog/worklog.facade';
  * Container for the entire grid including header, background, footer, time marker, and work log entries.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-grid',
   templateUrl: './grid.component.html',
   styleUrls: ['./grid.component.scss'],

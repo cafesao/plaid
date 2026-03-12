@@ -6,6 +6,7 @@ import Timeout = NodeJS.Timeout;
  * Dumb component, presents error modal and delegates actions to parent component.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-error-modal',
   templateUrl: './error-modal.component.html',
   styleUrls: ['../connection-issue-resolver.component.scss'],

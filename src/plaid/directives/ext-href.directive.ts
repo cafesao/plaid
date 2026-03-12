@@ -1,7 +1,8 @@
 import {Directive, ElementRef, HostListener, Input} from '@angular/core';
-import {ElectronService} from 'ngx-electron';
+import {ElectronService} from '../core/electron.service';
 
 @Directive({
+  standalone: false,
   selector: '[plaidExtHref]'
 })
 export class ExtHrefDirective {
@@ -19,7 +20,7 @@ export class ExtHrefDirective {
   @HostListener('click')
   onClick(): void {
     if (this._plaidExtHref != null) {
-      this.electron.shell.openExternal(this._plaidExtHref);
+      this.electron.openExternal(this._plaidExtHref);
     }
   }
 

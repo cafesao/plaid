@@ -47,10 +47,10 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private retryAfterAuthenticated(event$fn: () => Observable<HttpEvent<any>>): Observable<HttpEvent<any>> {
     return this.authState.getAuthenticatedUser$().pipe(
-      skip<User>(1),
-      filter<User>((user: User) => user != null),
-      take<User>(1),
-      mergeMap<User, Observable<HttpEvent<any>>>(() => event$fn())
+      skip(1),
+      filter((user: User) => user != null),
+      take(1),
+      mergeMap(() => event$fn())
     );
   }
 }

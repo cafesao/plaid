@@ -71,12 +71,12 @@ export class WorklogFacade {
    */
   private streamAllIssuesForWorklogDateRange$(dateRange: DateRange, user: User): Observable<Issue[]> {
     return this.worklogApi.getIssuesForWorklogDateRange$(dateRange, user).pipe(
-      expand<SearchResults>(
+      expand(
         (results: SearchResults) => (results.startAt + results.issues.length) < results.total
           ? this.worklogApi.getIssuesForWorklogDateRange$(dateRange, user, results.startAt + results.issues.length)
           : EMPTY
       ),
-      map<SearchResults, Issue[]>((results: SearchResults) => results.issues)
+      map((results: SearchResults) => results.issues)
     );
   }
 
@@ -85,12 +85,12 @@ export class WorklogFacade {
    */
   private streamAllWorklogsForIssue$(issue: Issue): Observable<Worklog[]> {
     return this.worklogApi.getWorklogsForIssue$(issue.id).pipe(
-      expand<WorklogWithPagination>(
+      expand(
         (results: WorklogWithPagination) => (results.startAt + results.worklogs.length) < results.total
           ? this.worklogApi.getWorklogsForIssue$(issue.id, results.startAt + results.worklogs.length)
           : EMPTY
       ),
-      map<WorklogWithPagination, Worklog[]>(results => results.worklogs.map(wl => ({...wl, issue})))
+      map((results: WorklogWithPagination) => results.worklogs.map(wl => ({...wl, issue})))
     );
   }
 
@@ -100,13 +100,14 @@ export class WorklogFacade {
    */
   private getWorklogsForDateRangeVerbose$(dateRange: DateRange, user: User): Observable<Worklog[]> {
     return this.streamAllIssuesForWorklogDateRange$(dateRange, user).pipe(
-      mergeAll<Issue>(),
-      mergeMap<Issue, Observable<Worklog[]>>(issue => this.streamAllWorklogsForIssue$(issue)),
-      map<Worklog[], Worklog[]>(worklogs => worklogs.filter(worklog => decodeURIComponent(worklog.author.self) === decodeURIComponent(user.self)
+      mergeAll(),
+      mergeMap((issue: Issue) => this.streamAllWorklogsForIssue$(issue)),
+      map((worklogs: Worklog[]) => worklogs.filter(worklog =>
+        decodeURIComponent(worklog.author.self) === decodeURIComponent(user.self)
         && new Date(worklog.started).valueOf() >= dateRange.start.valueOf()
         && new Date(worklog.started).valueOf() < dateRange.end.valueOf() + 86400000
       )),
-      scan<Worklog[], Worklog[]>((acc: Worklog[], val: Worklog[]) => acc.concat(val), [])
+      scan((acc: Worklog[], val: Worklog[]) => acc.concat(val), [] as Worklog[])
     );
   }
 
@@ -164,7 +165,7 @@ export class WorklogFacade {
    */
   addWorklog$(worklog: Worklog, started: Date, timeSpentSeconds: number, comment: string): Observable<Worklog> {
     return this.worklogApi.addWorklog$(worklog.issueId, started, timeSpentSeconds, comment).pipe(
-      tap<Worklog>(added => this.worklogState.addOrUpdateWorklog({...worklog, ...added}))
+      tap((added: Worklog) => this.worklogState.addOrUpdateWorklog({...worklog, ...added}))
     );
   }
 
@@ -173,7 +174,7 @@ export class WorklogFacade {
    */
   updateWorklog$(worklog: Worklog, started: Date, timeSpentSeconds: number, comment: string): Observable<Worklog> {
     return this.worklogApi.updateWorklog$(worklog.issueId, worklog.id, started, timeSpentSeconds, comment).pipe(
-      tap<Worklog>(updated => this.worklogState.addOrUpdateWorklog({...worklog, ...updated}))
+      tap((updated: Worklog) => this.worklogState.addOrUpdateWorklog({...worklog, ...updated}))
     );
   }
 

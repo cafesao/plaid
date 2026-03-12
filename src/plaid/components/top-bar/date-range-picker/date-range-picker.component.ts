@@ -18,6 +18,7 @@ import Timeout = NodeJS.Timeout;
  * delegating change in week selection.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-date-range-picker',
   templateUrl: './date-range-picker.component.html',
   styleUrls: ['./date-range-picker.component.scss'],

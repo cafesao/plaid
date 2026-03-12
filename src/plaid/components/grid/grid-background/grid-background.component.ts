@@ -4,6 +4,7 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
  * Dumb component, presents background to the grid.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-grid-background',
   templateUrl: './grid-background.component.html',
   styleUrls: ['./grid-background.component.scss'],

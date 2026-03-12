@@ -4,6 +4,7 @@ import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} f
  * Dumb component, presents button, handles refresh shortcuts, and delegates refresh action
  */
 @Component({
+  standalone: false,
   selector: 'plaid-refresh-button',
   templateUrl: './refresh-button.component.html'
 })

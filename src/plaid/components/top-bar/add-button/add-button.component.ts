@@ -5,6 +5,7 @@ import { GridComponent } from '../../grid/grid.component';
  * Dumb component, responsible for presenting "Add worklog" button and delegating the action to the grid component.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-add-button',
   templateUrl: './add-button.component.html'
 })

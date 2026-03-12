@@ -14,6 +14,7 @@ import {SystemPreferencesService} from '../core/system-preferences.service';
  * Application container.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-root',
   templateUrl: './plaid.component.html',
   styleUrls: ['./plaid.component.scss']

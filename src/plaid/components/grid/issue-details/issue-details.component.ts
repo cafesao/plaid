@@ -5,6 +5,7 @@ import {Issue} from '../../../model/issue';
  * Dumb component presenting the details of an issue for the worklog panel and issue selector.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-issue-details',
   templateUrl: './issue-details.component.html',
   styleUrls: ['./issue-details.component.scss'],

@@ -12,6 +12,7 @@ import {Calendar} from '../../../../helpers/calendar';
  * delegating change in date selection.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-date-picker-cloud',
   templateUrl: './date-picker-cloud.component.html',
   styleUrls: ['./date-picker-cloud.component.scss'],

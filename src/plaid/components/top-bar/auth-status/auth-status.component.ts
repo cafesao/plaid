@@ -15,6 +15,7 @@ import {environment} from '../../../../environments/environment';
  * account. Presents these actions in a dropdown menu.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-auth-status',
   templateUrl: './auth-status.component.html',
   styleUrls: ['./auth-status.component.scss'],

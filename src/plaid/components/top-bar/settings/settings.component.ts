@@ -14,6 +14,7 @@ import {Theme} from '../../../model/theme';
  * Dumb component, presents settings button and dropdown, and delegates settings changes to the parent component.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],

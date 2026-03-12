@@ -8,6 +8,7 @@ import {Format} from '../../../helpers/format';
  * Dumb component, responsible for displaying current time and marking current date on the grid.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-current-time-marker',
   templateUrl: './current-time-marker.component.html',
   styleUrls: ['./current-time-marker.component.scss'],

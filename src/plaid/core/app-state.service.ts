@@ -6,12 +6,12 @@ import {UserPreferencesService} from './user-preferences.service';
 
 @Injectable({ providedIn: 'root' })
 export class AppStateService {
-  private connectionIssueModalVisible: BehaviorSubject<ConnectionIssueModalVisible> =
+  private connectionIssueModalVisible =
     new BehaviorSubject<ConnectionIssueModalVisible>(ConnectionIssueModalVisible.NONE);
-  private visibleDateRange: BehaviorSubject<DateRange> =
-    new BehaviorSubject<DateRange>(this.getInitialVisibleDateRange());
+  private visibleDateRange: BehaviorSubject<DateRange>;
 
   constructor(private userPrefsService: UserPreferencesService) {
+    this.visibleDateRange = new BehaviorSubject<DateRange>(this.getInitialVisibleDateRange());
   }
 
   private getInitialVisibleDateRange(): DateRange {

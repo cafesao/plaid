@@ -1,8 +1,16 @@
-const {app, BrowserWindow, Menu} = require('electron');
+const {app, BrowserWindow, Menu, ipcMain, nativeTheme, shell} = require('electron');
 const {autoUpdater} = require('electron-updater');
 const {getNewWindowRect, getNewWindowMaximized, saveWindowState} = require('./window-state');
+const path = require('path');
 
 let firstWindowCreated = false;
+
+// IPC handlers for nativeTheme
+ipcMain.handle('native-theme:shouldUseDarkColors', () => nativeTheme.shouldUseDarkColors);
+ipcMain.handle('native-theme:setSource', (event, source) => {
+  nativeTheme.themeSource = source;
+});
+ipcMain.handle('shell:openExternal', (event, url) => shell.openExternal(url));
 
 // Workaround for https://github.com/electron/electron/issues/23664
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
@@ -30,10 +38,15 @@ function createWindow(dev) {
     minHeight: 200,
     show: false,
     webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      webSecurity: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: false,
+      preload: path.join(__dirname, 'preload.js')
     }
+  });
+
+  nativeTheme.on('updated', () => {
+    window.webContents.send('native-theme:updated', nativeTheme.shouldUseDarkColors);
   });
 
   window.on('close', () => {
@@ -86,7 +99,7 @@ function createWindow(dev) {
     window.loadURL('http://localhost:4300');
   } else {
     window.setMenu(null);
-    window.loadFile('build/index.html');
+    window.loadFile('build/browser/index.html');
   }
   if (getNewWindowMaximized(!firstWindowCreated)) {
     window.maximize();

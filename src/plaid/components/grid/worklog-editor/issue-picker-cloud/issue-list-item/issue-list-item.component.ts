@@ -6,6 +6,7 @@ import {Issue} from '../../../../../model/issue';
  * the item and adding/removing favorite status.
  */
 @Component({
+  standalone: false,
   selector: 'plaid-issue-list-item',
   templateUrl: './issue-list-item.component.html',
   styleUrls: ['./issue-list-item.component.scss']

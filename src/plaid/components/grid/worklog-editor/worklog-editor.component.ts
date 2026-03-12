@@ -25,6 +25,7 @@ import {Subject} from 'rxjs';
  * Smart component, presenting edited worklog, handling all its interactions and updating worklog on the server
  */
 @Component({
+  standalone: false,
   selector: 'plaid-worklog-editor',
   templateUrl: './worklog-editor.component.html',
   styleUrls: ['./worklog-editor.component.scss'],
