@@ -236,3 +236,70 @@ describe('WorklogEditorComponent saving', () => {
     expect(editor.worklog).toBeNull();
   });
 });
+
+// The editor can close while a save is in flight (login expired, lost connection, the day leaving the visible days).
+// The answer to that save must only act on the editor session that sent it.
+describe('WorklogEditorComponent late save answers', () => {
+  let editor: WorklogEditorComponent;
+  let worklogDraft: WorklogDraftService;
+  let worklogFacade: WorklogFacadeMock;
+  let first: Subject<Worklog>;
+  let second: Subject<Worklog>;
+  const openAdd = () => openAddIn(editor);
+
+  /** Starts adding entry A and closes the editor while A is still being sent. */
+  function sendAAndCloseMidway(): void {
+    openAdd();
+    editor.selectIssue(ISSUE_2);
+    editor.commentString = 'A';
+    editor.save();
+    editor.visibleDaysStart = 3; // Tuesday leaves the visible days: the editor closes
+    editor.visibleDaysStart = 0;
+  }
+
+  beforeEach(() => {
+    ({editor, worklogDraft, worklogFacade} = createEditor());
+    first = new Subject<Worklog>();
+    second = new Subject<Worklog>();
+    worklogFacade.addWorklog$.mockReturnValueOnce(first).mockReturnValueOnce(second);
+  });
+
+  afterEach(() => {
+    editor.worklog = null; // removes the keydown listener
+  });
+
+  it('a late error does not re-enable a newer save', () => {
+    sendAAndCloseMidway();
+    openAdd();
+    editor.commentString = 'B';
+    editor.save();
+    first.error(new HttpErrorResponse({status: 500}));
+    expect(editor.saving).toBe(true);
+    expect(editor.canSave()).toBe(false);
+  });
+
+  it('a late success does not close a newer editor', () => {
+    sendAAndCloseMidway();
+    openAdd();
+    first.next({id: '30001'});
+    first.complete();
+    expect(editor.worklog).not.toBeNull();
+  });
+
+  it('a late success drops the draft of the entry it saved', () => {
+    sendAAndCloseMidway();
+    first.next({id: '30001'});
+    first.complete();
+    expect(worklogDraft.get()).toBeNull();
+  });
+
+  it('a late success keeps what was typed afterwards', () => {
+    sendAAndCloseMidway();
+    openAdd();
+    editor.commentString = 'Newer';
+    editor.close();
+    first.next({id: '30001'});
+    first.complete();
+    expect(worklogDraft.get()).toEqual({issue: ISSUE_2, comment: 'Newer'});
+  });
+});

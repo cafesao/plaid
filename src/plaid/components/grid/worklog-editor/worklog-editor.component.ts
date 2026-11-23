@@ -566,23 +566,39 @@ export class WorklogEditorComponent implements OnInit {
       return;
     }
     this.saving = true;
+    // The editor may close while the request is in flight (login expired, lost connection, day no longer visible) and
+    // reopen for another worklog: the answer only acts on the editor session that sent it.
+    const session = this._worklog;
+    const sentComment = this.commentString;
+    const isCurrent = () => this._worklog === session;
     // On an error the app's error dialog explains it; the editor leaves "saving" and keeps what the user entered.
     const stopSaving = () => {
-      this.saving = false;
-      this.cdr.detectChanges();
+      if (isCurrent()) {
+        this.saving = false;
+        this.cdr.detectChanges();
+      }
     };
     if (this.adding) {
       this.worklogFacade.addWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
         next: () => {
-          this.worklogDraft.clear();
-          this.hide();
+          const draft = this.worklogDraft.get();
+          if (isCurrent() || (draft && draft.comment === sentComment && (!draft.issue || draft.issue.id === session.issueId))) {
+            this.worklogDraft.clear();
+          }
+          if (isCurrent()) {
+            this.hide();
+          }
         },
         error: stopSaving,
         complete: stopSaving
       });
     } else {
       this.worklogFacade.updateWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
-        next: () => this.close(),
+        next: () => {
+          if (isCurrent()) {
+            this.close();
+          }
+        },
         error: stopSaving,
         complete: stopSaving
       });
