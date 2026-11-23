@@ -63,7 +63,7 @@ Ctrl to snap to 60 minutes."
       <button
         id="save-button"
         class="button primary tangible"
-        [disabled]="saving || !worklog || !worklog.issueId"
+        [disabled]="!canSave()"
         title=""
         (click)="save()"
         [tabIndex]="shouldTabIndexBe0() ? 0 : -1"
