@@ -2,6 +2,7 @@ const {app, BrowserWindow, Menu, ipcMain, nativeTheme, shell} = require('electro
 const {autoUpdater} = require('electron-updater');
 const {getNewWindowRect, getNewWindowMaximized, saveWindowState} = require('./window-state');
 const path = require('path');
+const os = require('os');
 
 let firstWindowCreated = false;
 
@@ -15,8 +16,10 @@ ipcMain.handle('shell:openExternal', (event, url) => shell.openExternal(url));
 // Workaround for https://github.com/electron/electron/issues/23664
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
 
-// WSL GPU workaround
-app.disableHardwareAcceleration();
+// WSL GPU workaround (only under WSL, keeps GPU acceleration on Windows, macOS and native Linux)
+if (process.platform === 'linux' && os.release().toLowerCase().includes('microsoft')) {
+  app.disableHardwareAcceleration();
+}
 
 function createWindow(dev) {
   if (!firstWindowCreated) { // Check for update once in the process (if subsequent windows are opened, don't check again)
