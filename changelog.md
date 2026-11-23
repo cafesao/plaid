@@ -1,5 +1,16 @@
 # Change log
 
+## 1.1
+
+**1.1.0** (fork cafesao/plaid)
+
+- closing the editor of a new entry without adding it (clicking outside or Esc) keeps the issue and comment for the next
+  new entry; Cancel discards them
+- automatic issue suggestion no longer replaces the issue you picked
+- weeks load without waiting for a click, visited weeks show at once, and Jira rate limits (HTTP 429) are retried
+- Jira Cloud only (Jira Server/Data Center stopped working in October 2025)
+- automatic updates come from github.com/cafesao/plaid releases
+
 ## 1.0
 
 **1.0.1**
