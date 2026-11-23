@@ -20,7 +20,6 @@ export class IssueApi {
   search$(jql: string, limit: number = 15): Observable<SearchResults> {
     const url = this.searchUrl
       + '?jql=' + encodeURIComponent(jql)
-      + '&startAt=0'
       + '&maxResults=' + limit
       + '&fields=components,issuetype,parent,priority,summary,status';
     return this.http.get<SearchResults>(url);

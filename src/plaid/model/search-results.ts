@@ -6,6 +6,9 @@ export interface SearchResults {
   maxResults?: number;
   total?: number;
   issues?: Issue[];
+  /** Token of the next page (Jira Cloud /rest/api/3/search/jql). Absent on the last page. */
+  nextPageToken?: string;
+  isLast?: boolean;
   warningMessages?: string[];
   names?: {};
   schema?: {};

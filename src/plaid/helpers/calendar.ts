@@ -76,4 +76,11 @@ export class Calendar {
       end: new Date(dateRange.end)
     };
   }
+
+  /**
+   * Midnight (local time) of the day after the given date, i.e. the exclusive end of a range that ends on that date.
+   */
+  static dayAfter(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  }
 }

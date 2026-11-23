@@ -5,8 +5,8 @@ import { SearchResults } from '../../model/search-results';
 import { formatDate } from '@angular/common';
 import { Observable } from 'rxjs';
 import { WorklogWithPagination } from '../../model/worklog-with-pagination';
-import { User } from '../../model/user';
 import { DateRange } from '../../model/date-range';
+import { Calendar } from '../../helpers/calendar';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogApi {
@@ -15,35 +15,43 @@ export class WorklogApi {
   private readonly addWorklogUrl = '/rest/api/2/issue/{issueIdOrKey}/worklog';
   private readonly updateWorklogUrl = '/rest/api/2/issue/{issueIdOrKey}/worklog/{id}';
   private readonly deleteWorklogUrl = '/rest/api/2/issue/{issueIdOrKey}/worklog/{id}';
+  private readonly searchPageSize = 100;
 
   constructor(private http: HttpClient) { }
 
   /**
-   * Emits search results directly as fetched from API.
+   * Emits a page of issues with the user's work logs in the date range, directly as fetched from API. Pass the
+   * nextPageToken of the previous page to get the next one.
+   *
+   * The JQL range is widened by one day on each side because worklogDate follows the time zone of the Jira profile,
+   * which may differ from this machine's. Work logs outside the visible range are filtered out by the caller.
    */
-  getIssuesForWorklogDateRange$(
-    dateRange: DateRange,
-    user: User,
-    startAt = 0
-  ): Observable<SearchResults> {
-    const url = this.searchUrl
+  getIssuesForWorklogDateRange$(dateRange: DateRange, nextPageToken?: string): Observable<SearchResults> {
+    const jqlStart = new Date(dateRange.start.getFullYear(), dateRange.start.getMonth(), dateRange.start.getDate() - 1);
+    const jqlEnd = new Date(dateRange.end.getFullYear(), dateRange.end.getMonth(), dateRange.end.getDate() + 1);
+    let url = this.searchUrl
       + '?fields=components,issuetype,parent,priority,summary,status'
-      + '&startAt=' + startAt
+      + '&maxResults=' + this.searchPageSize
       + '&jql=' + encodeURIComponent(
         'worklogAuthor = currentUser() && worklogDate >= "'
-          + formatDate(dateRange.start, 'yyyy-MM-dd', 'en-US') + '" && worklogDate <= "'
-          + formatDate(dateRange.end, 'yyyy-MM-dd', 'en-US') + '"'
+          + formatDate(jqlStart, 'yyyy-MM-dd', 'en-US') + '" && worklogDate <= "'
+          + formatDate(jqlEnd, 'yyyy-MM-dd', 'en-US') + '"'
       );
+    if (nextPageToken) {
+      url += '&nextPageToken=' + encodeURIComponent(nextPageToken);
+    }
     return this.http.get<SearchResults>(url);
   }
 
   /**
-   * Emits a page of work logs directly as fetched from API.
+   * Emits a page of an issue's work logs started within the date range, directly as fetched from API.
    */
-  getWorklogsForIssue$(issueId: string, startAt = 0): Observable<WorklogWithPagination> {
-    let url = this.getWorklogsUrl.replace('{issueIdOrKey}', issueId);
+  getWorklogsForIssue$(issueId: string, dateRange: DateRange, startAt = 0): Observable<WorklogWithPagination> {
+    let url = this.getWorklogsUrl.replace('{issueIdOrKey}', issueId)
+      + '?startedAfter=' + dateRange.start.getTime()
+      + '&startedBefore=' + Calendar.dayAfter(dateRange.end).getTime();
     if (startAt > 0) {
-      url += '?startAt=' + startAt;
+      url += '&startAt=' + startAt;
     }
     return this.http.get<WorklogWithPagination>(url);
   }

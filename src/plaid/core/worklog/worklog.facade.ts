@@ -15,6 +15,9 @@ import {Issue} from '../../model/issue';
 import {WorklogWithPagination} from '../../model/worklog-with-pagination';
 import {SearchResults} from '../../model/search-results';
 
+/** Maximum number of issues whose work logs are fetched at the same time. */
+export const WORKLOG_REQUEST_CONCURRENCY = 4;
+
 /**
  * Business logic facade for work logs.
  */
@@ -69,25 +72,25 @@ export class WorklogFacade {
   /**
    * Emits work log issues page by page.
    */
-  private streamAllIssuesForWorklogDateRange$(dateRange: DateRange, user: User): Observable<Issue[]> {
-    return this.worklogApi.getIssuesForWorklogDateRange$(dateRange, user).pipe(
+  private streamAllIssuesForWorklogDateRange$(dateRange: DateRange): Observable<Issue[]> {
+    return this.worklogApi.getIssuesForWorklogDateRange$(dateRange).pipe(
       expand(
-        (results: SearchResults) => (results.startAt + results.issues.length) < results.total
-          ? this.worklogApi.getIssuesForWorklogDateRange$(dateRange, user, results.startAt + results.issues.length)
+        (results: SearchResults) => results.isLast !== true && results.nextPageToken
+          ? this.worklogApi.getIssuesForWorklogDateRange$(dateRange, results.nextPageToken)
           : EMPTY
       ),
-      map((results: SearchResults) => results.issues)
+      map((results: SearchResults) => results.issues || [])
     );
   }
 
   /**
-   * Emits work logs of an issue page by page.
+   * Emits work logs of an issue started within the date range, page by page.
    */
-  private streamAllWorklogsForIssue$(issue: Issue): Observable<Worklog[]> {
-    return this.worklogApi.getWorklogsForIssue$(issue.id).pipe(
+  private streamAllWorklogsForIssue$(issue: Issue, dateRange: DateRange): Observable<Worklog[]> {
+    return this.worklogApi.getWorklogsForIssue$(issue.id, dateRange).pipe(
       expand(
         (results: WorklogWithPagination) => (results.startAt + results.worklogs.length) < results.total
-          ? this.worklogApi.getWorklogsForIssue$(issue.id, results.startAt + results.worklogs.length)
+          ? this.worklogApi.getWorklogsForIssue$(issue.id, dateRange, results.startAt + results.worklogs.length)
           : EMPTY
       ),
       map((results: WorklogWithPagination) => results.worklogs.map(wl => ({...wl, issue})))
@@ -99,13 +102,15 @@ export class WorklogFacade {
    * complete.
    */
   private getWorklogsForDateRangeVerbose$(dateRange: DateRange, user: User): Observable<Worklog[]> {
-    return this.streamAllIssuesForWorklogDateRange$(dateRange, user).pipe(
+    const rangeEnd: number = Calendar.dayAfter(dateRange.end).getTime();
+    return this.streamAllIssuesForWorklogDateRange$(dateRange).pipe(
       mergeAll(),
-      mergeMap((issue: Issue) => this.streamAllWorklogsForIssue$(issue)),
+      mergeMap((issue: Issue) => this.streamAllWorklogsForIssue$(issue, dateRange), WORKLOG_REQUEST_CONCURRENCY),
+      // The API already filters by date; this is a safety net, plus the author filter the API does not offer.
       map((worklogs: Worklog[]) => worklogs.filter(worklog =>
         decodeURIComponent(worklog.author.self) === decodeURIComponent(user.self)
         && new Date(worklog.started).valueOf() >= dateRange.start.valueOf()
-        && new Date(worklog.started).valueOf() < dateRange.end.valueOf() + 86400000
+        && new Date(worklog.started).valueOf() < rangeEnd
       )),
       scan((acc: Worklog[], val: Worklog[]) => acc.concat(val), [] as Worklog[])
     );

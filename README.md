@@ -9,7 +9,7 @@
 
 ![Screenshot](https://raw.githubusercontent.com/piotrmski/plaid/master/screenshot.png)
 
-Plaid lets you get a better overview of your Jira worklog. Add, edit and remove your worklog entries, which are neatly laid out on a calendar. Works both with Jira Server and Jira Cloud.
+Plaid lets you get a better overview of your Jira worklog. Add, edit and remove your worklog entries, which are neatly laid out on a calendar. Works with Jira Cloud only. Jira Server/Data Center stopped working in October 2025, when issue search moved to /rest/api/3/search/jql (required by Jira Cloud), an endpoint that Jira Server does not have.
 
 
 ## Features

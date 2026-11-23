@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Plaid is a desktop Jira worklog editor built with Angular 21 + Electron 41. It provides a calendar-based UI for managing work log entries, supporting both Jira Server and Jira Cloud.
+Plaid is a desktop Jira worklog editor built with Angular 21 + Electron 45. It provides a calendar-based UI for managing work log entries, Jira Cloud only (Jira Server unsupported since 2025-10).
 
 ## Build & Development Commands
 
