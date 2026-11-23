@@ -1,0 +1,10 @@
+# Dependency build scripts. None is needed for the app to compile, test or run, so all are denied:
+# - esbuild, @parcel/watcher, lmdb, msgpackr-extract: use the prebuilt binary from their platform package.
+# - electron-winstaller: only picks the 7-Zip binary for Squirrel.Windows installers; Plaid builds NSIS.
+# Electron itself has no install script: its binary is downloaded on first run.
+allowBuilds:
+  '@parcel/watcher': false
+  electron-winstaller: false
+  esbuild: false
+  lmdb: false
+  msgpackr-extract: false

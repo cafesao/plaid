@@ -10,7 +10,7 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'npm run serve-dev',
+    command: 'pnpm serve-dev',
     port: 4300,
     timeout: 120000,
     reuseExistingServer: true,

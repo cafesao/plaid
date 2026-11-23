@@ -55,9 +55,13 @@
         "publish": "electron-builder --publish always",
         "test": "jest --config jest.config.js",
         "test:watch": "jest --config jest.config.js --watch",
-        "test:e2e": "npx playwright test"
+        "test:e2e": "playwright test"
     },
     "private": false,
+    "packageManager": "pnpm@12.23.0",
+    "engines": {
+        "node": ">=26"
+    },
     "dependencies": {
         "@angular/animations": "~21.2.26",
         "@angular/common": "~21.2.26",
