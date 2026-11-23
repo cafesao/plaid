@@ -59,7 +59,7 @@
     "lint": "biome lint .",
     "format": "biome format --write . && prettier --write \"**/*.html\"",
     "typecheck": "tsc -p tsconfig.spec.json --noEmit",
-    "check": "biome ci --error-on-warnings . && prettier --check \"**/*.html\" && pnpm typecheck && pnpm test && pnpm build"
+    "check": "biome ci --error-on-warnings . && prettier --check \"**/*.html\" && node scripts/check-agents-doc.mjs && pnpm typecheck && pnpm test && pnpm build"
   },
   "private": false,
   "packageManager": "pnpm@12.23.0",
