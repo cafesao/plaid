@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { GridComponent } from '../../grid/grid.component';
 
 /**
@@ -7,6 +7,7 @@ import { GridComponent } from '../../grid/grid.component';
 @Component({
   standalone: false,
   selector: 'plaid-add-button',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-button.component.html'
 })
 export class AddButtonComponent {

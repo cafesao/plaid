@@ -10,7 +10,7 @@ import {
 import {Worklog} from '../../model/worklog';
 import {DateRange} from '../../model/date-range';
 import {Format} from '../../helpers/format';
-import {User} from 'src/plaid/model/user';
+import {User} from '../../model/user';
 import {WorklogFacade} from '../../core/worklog/worklog.facade';
 
 /**

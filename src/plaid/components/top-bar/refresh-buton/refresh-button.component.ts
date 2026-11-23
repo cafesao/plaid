@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 
 /**
  * Dumb component, presents button, handles refresh shortcuts, and delegates refresh action
@@ -6,6 +6,7 @@ import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} f
 @Component({
   standalone: false,
   selector: 'plaid-refresh-button',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './refresh-button.component.html'
 })
 export class RefreshButtonComponent implements OnInit {

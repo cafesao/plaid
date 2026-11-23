@@ -34,7 +34,7 @@
     <select
       class="input narrow-dropdown"
       [tabIndex]="dropdownOpen ? 0 : -1"
-      [ngModel]="workingDaysStart?.toString()"
+      [ngModel]="$safeNavigationMigration(workingDaysStart?.toString())"
       (ngModelChange)="setWorkingDaysStart(+$event)"
     >
       <option *ngFor="let day of weekdays; index as i" [value]="i" [disabled]="i > workingDaysEnd">{{ day }}</option>
@@ -43,7 +43,7 @@
     <select
       class="input narrow-dropdown"
       [tabIndex]="dropdownOpen ? 0 : -1"
-      [ngModel]="workingDaysEnd?.toString()"
+      [ngModel]="$safeNavigationMigration(workingDaysEnd?.toString())"
       (ngModelChange)="setWorkingDaysEnd(+$event)"
     >
       <option *ngFor="let day of weekdays; index as i" [value]="i" [disabled]="i < workingDaysStart">{{ day }}</option>
@@ -66,7 +66,7 @@
     <select
       class="input wide-dropdown"
       [tabIndex]="dropdownOpen ? 0 : -1"
-      [ngModel]="refreshIntervalMinutes?.toString()"
+      [ngModel]="$safeNavigationMigration(refreshIntervalMinutes?.toString())"
       (ngModelChange)="setRefreshIntervalMinutes(+$event)"
     >
       <option value="0">Disabled</option>

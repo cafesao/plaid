@@ -30,7 +30,7 @@
       [title]="issue.fields.priority.name"
       class="field-icon"
     >
-    <span class="status" *ngIf="issue.fields.status" [ngClass]="issue.fields.status.statusCategory?.colorName">
+    <span class="status" *ngIf="issue.fields.status" [ngClass]="$safeNavigationMigration($safeNavigationMigration(issue.fields.status.statusCategory?.colorName))">
       {{ issue.fields.status.name }}
     </span>
     {{ getComponents() }}

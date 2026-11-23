@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {Worklog} from '../model/worklog';
 import {DateRange} from '../model/date-range';
 import {User} from '../model/user';
@@ -17,6 +17,7 @@ import {SystemPreferencesService} from '../core/system-preferences.service';
   standalone: false,
   selector: 'plaid-root',
   templateUrl: './plaid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./plaid.component.scss']
 })
 export class PlaidComponent implements OnInit {

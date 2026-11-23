@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 
 /**
  * Dumb component, presents two buttons, handles zoom change shortcuts and delegates change in pixelsPerMinute value.
@@ -6,6 +6,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 @Component({
   standalone: false,
   selector: 'plaid-zoom-controls',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './zoom-controls.component.html'
 })
 export class ZoomControlsComponent implements OnInit {

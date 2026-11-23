@@ -1,11 +1,13 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
+    // TypeScript 6 turns strict mode on by default. This project was never written for it: enabling it means
+    // reworking ~160 component fields and null handling (without `!`), with risk of changing behavior.
+    // Kept off on purpose; strict mode is the next project, with its own proof.
+    "strict": false,
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "module": "es2022",
     "moduleResolution": "bundler",

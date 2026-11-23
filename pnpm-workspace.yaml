@@ -8,3 +8,13 @@ allowBuilds:
   esbuild: false
   lmdb: false
   msgpackr-extract: false
+
+# Upstream mismatch inside @angular/build 22.3.0: its WebAssembly fallback parser
+# (@oxc-parser/binding-wasm32-wasi 0.158.0) pins @emnapi/* 2.0.0-alpha.6, while
+# @napi-rs/wasm-runtime 1.2.7 declares ^1.7.1 || 2.0.0-beta.2 || 2.0.0-beta.3.
+# The wasm fallback is never loaded on x64/arm64 (native oxc binding is used), so the
+# exact pinned version is accepted for that one edge instead of forcing another version.
+peerDependencyRules:
+  allowedVersions:
+    '@napi-rs/wasm-runtime>@emnapi/core': 2.0.0-alpha.6
+    '@napi-rs/wasm-runtime>@emnapi/runtime': 2.0.0-alpha.6

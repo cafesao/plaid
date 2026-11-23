@@ -14,6 +14,7 @@ import { Subject } from 'rxjs';
   standalone: false,
   selector: 'plaid-connection-issue-resolver',
   templateUrl: './connection-issue-resolver.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./connection-issue-resolver.component.scss']
 })
 export class ConnectionIssueResolverComponent implements OnInit {
