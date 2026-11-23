@@ -14,8 +14,10 @@ export class ExtHrefDirective {
     this.el.nativeElement.style.cursor = value != null ? 'pointer' : undefined;
   }
 
-  constructor(private el: ElementRef, private electron: ElectronService) {
-  }
+  constructor(
+    private el: ElementRef,
+    private electron: ElectronService
+  ) {}
 
   @HostListener('click')
   onClick(): void {
@@ -23,5 +25,4 @@ export class ExtHrefDirective {
       this.electron.openExternal(this._plaidExtHref);
     }
   }
-
 }

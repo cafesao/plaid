@@ -4,7 +4,7 @@ import './electron-api';
 @Injectable({providedIn: 'root'})
 export class ElectronService {
   get isElectronApp(): boolean {
-    return !!(window?.electronAPI);
+    return !!window?.electronAPI;
   }
 
   openExternal(url: string): void {

@@ -1,5 +1,5 @@
 <a class="button both-color-schemes" (mousedown)="dropdownOpen = !dropdownOpen" [class.active]="dropdownOpen">
-  <img [src]="currentUserAvatarUrl" *ngIf="currentUserAvatarUrl">
+  <img [src]="currentUserAvatarUrl" *ngIf="currentUserAvatarUrl" />
   <svg class="icon-user" *ngIf="!currentUserAvatarUrl"><use href="assets/icons.svg#user"></use></svg>
 </a>
 <div class="dropdown" [class.open]="dropdownOpen">
@@ -12,7 +12,5 @@
     <p class="headline">Logged out</p>
     <a class="button padded" (click)="changeCredentials.emit(); dropdownOpen = false">Log in</a>
   </ng-container>
-  <small class="appName" plaidExtHref="https://github.com/piotrmski/plaid">
-    Plaid {{ appVersion }}
-  </small>
+  <small class="appName" plaidExtHref="https://github.com/piotrmski/plaid"> Plaid {{ appVersion }} </small>
 </div>

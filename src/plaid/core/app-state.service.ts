@@ -4,10 +4,9 @@ import {ConnectionIssueModalVisible} from '../components/connection-issue-resolv
 import {DateRange} from '../model/date-range';
 import {UserPreferencesService} from './user-preferences.service';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AppStateService {
-  private connectionIssueModalVisible =
-    new BehaviorSubject<ConnectionIssueModalVisible>(ConnectionIssueModalVisible.NONE);
+  private connectionIssueModalVisible = new BehaviorSubject<ConnectionIssueModalVisible>(ConnectionIssueModalVisible.NONE);
   private visibleDateRange: BehaviorSubject<DateRange>;
 
   constructor(private userPrefsService: UserPreferencesService) {
@@ -26,7 +25,7 @@ export class AppStateService {
       weekStart.getMonth(),
       weekStart.getDate() + this.userPrefsService.getVisibleDaysEnd() - this.userPrefsService.getVisibleDaysStart()
     );
-    return { start: weekStart, end: weekEnd };
+    return {start: weekStart, end: weekEnd};
   }
 
   setConnectionIssueModalVisible(visible: ConnectionIssueModalVisible): void {

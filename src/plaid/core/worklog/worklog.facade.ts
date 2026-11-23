@@ -22,7 +22,7 @@ export const WORKLOG_REQUEST_CONCURRENCY = 4;
 /**
  * Business logic facade for work logs.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class WorklogFacade {
   private fetchWorklogsSubscription: Subscription;
   /**
@@ -49,8 +49,10 @@ export class WorklogFacade {
       this.visibleDateRange = Calendar.copyDateRange(dateRange);
       if (this.currentUser) {
         // Fetching worklogs is omitted when the new date range is a sub-interval of the old date range.
-        if (oldVisibleDateRange.start.getTime() > dateRange.start.getTime() ||
-          oldVisibleDateRange.end.getTime() < dateRange.end.getTime()) {
+        if (
+          oldVisibleDateRange.start.getTime() > dateRange.start.getTime() ||
+          oldVisibleDateRange.end.getTime() < dateRange.end.getTime()
+        ) {
           const cached: Worklog[] = this.worklogCache.get(this.visibleDateRange);
           if (cached) {
             // Show the period seen before at once, then check it against Jira in the background.
@@ -91,8 +93,8 @@ export class WorklogFacade {
    */
   private streamAllIssuesForWorklogDateRange$(dateRange: DateRange): Observable<Issue[]> {
     return this.worklogApi.getIssuesForWorklogDateRange$(dateRange).pipe(
-      expand(
-        (results: SearchResults) => results.isLast !== true && results.nextPageToken
+      expand((results: SearchResults) =>
+        results.isLast !== true && results.nextPageToken
           ? this.worklogApi.getIssuesForWorklogDateRange$(dateRange, results.nextPageToken)
           : EMPTY
       ),
@@ -107,10 +109,10 @@ export class WorklogFacade {
     return this.worklogApi.getWorklogsForIssue$(issue.id, dateRange).pipe(
       expand(
         // An empty page ends paging too: total may count worklogs the period filter left out.
-        (results: WorklogWithPagination) => results.worklogs.length > 0
-          && (results.startAt + results.worklogs.length) < results.total
-          ? this.worklogApi.getWorklogsForIssue$(issue.id, dateRange, results.startAt + results.worklogs.length)
-          : EMPTY
+        (results: WorklogWithPagination) =>
+          results.worklogs.length > 0 && results.startAt + results.worklogs.length < results.total
+            ? this.worklogApi.getWorklogsForIssue$(issue.id, dateRange, results.startAt + results.worklogs.length)
+            : EMPTY
       ),
       map((results: WorklogWithPagination) => results.worklogs.map(wl => ({...wl, issue})))
     );
@@ -126,11 +128,14 @@ export class WorklogFacade {
       mergeAll(),
       mergeMap((issue: Issue) => this.streamAllWorklogsForIssue$(issue, dateRange), WORKLOG_REQUEST_CONCURRENCY),
       // The API already filters by date; this is a safety net, plus the author filter the API does not offer.
-      map((worklogs: Worklog[]) => worklogs.filter(worklog =>
-        decodeURIComponent(worklog.author.self) === decodeURIComponent(user.self)
-        && new Date(worklog.started).valueOf() >= dateRange.start.valueOf()
-        && new Date(worklog.started).valueOf() < rangeEnd
-      )),
+      map((worklogs: Worklog[]) =>
+        worklogs.filter(
+          worklog =>
+            decodeURIComponent(worklog.author.self) === decodeURIComponent(user.self) &&
+            new Date(worklog.started).valueOf() >= dateRange.start.valueOf() &&
+            new Date(worklog.started).valueOf() < rangeEnd
+        )
+      ),
       scan((acc: Worklog[], val: Worklog[]) => acc.concat(val), [] as Worklog[])
     );
   }
@@ -174,7 +179,7 @@ export class WorklogFacade {
     let worklogs: Worklog[] = [];
 
     this.replaceFetch(this.getWorklogsForDateRangeVerbose$(dateRange, this.currentUser), {
-      next: (fetched: Worklog[]) => worklogs = fetched,
+      next: (fetched: Worklog[]) => (worklogs = fetched),
       complete: () => {
         this.worklogState.setFetching(false);
         if (this.mutationCount === mutationCountAtStart) {
@@ -212,18 +217,18 @@ export class WorklogFacade {
    * Upon subscription adds work log entry, emits response from the server after it successfully performs insertion
    */
   addWorklog$(worklog: Worklog, started: Date, timeSpentSeconds: number, comment: string): Observable<Worklog> {
-    return this.worklogApi.addWorklog$(worklog.issueId, started, timeSpentSeconds, comment).pipe(
-      tap((added: Worklog) => this.applyAddedOrUpdated({...worklog, ...added}))
-    );
+    return this.worklogApi
+      .addWorklog$(worklog.issueId, started, timeSpentSeconds, comment)
+      .pipe(tap((added: Worklog) => this.applyAddedOrUpdated({...worklog, ...added})));
   }
 
   /**
    * Upon subscription updates work log entry, emits response from the server after it acknowledged the update
    */
   updateWorklog$(worklog: Worklog, started: Date, timeSpentSeconds: number, comment: string): Observable<Worklog> {
-    return this.worklogApi.updateWorklog$(worklog.issueId, worklog.id, started, timeSpentSeconds, comment).pipe(
-      tap((updated: Worklog) => this.applyAddedOrUpdated({...worklog, ...updated}))
-    );
+    return this.worklogApi
+      .updateWorklog$(worklog.issueId, worklog.id, started, timeSpentSeconds, comment)
+      .pipe(tap((updated: Worklog) => this.applyAddedOrUpdated({...worklog, ...updated})));
   }
 
   private applyAddedOrUpdated(worklog: Worklog): void {
@@ -239,8 +244,7 @@ export class WorklogFacade {
     }
 
     if (this.refreshIntervalTimeoutMinutes > 0) {
-      this.refreshIntervalHandle =
-        setInterval(() => this.fetchWorklogsQuiet(), this.refreshIntervalTimeoutMinutes * 60000);
+      this.refreshIntervalHandle = setInterval(() => this.fetchWorklogsQuiet(), this.refreshIntervalTimeoutMinutes * 60000);
     }
   }
 

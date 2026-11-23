@@ -17,7 +17,7 @@ interface CacheEntry {
  * In-memory cache of the user's work logs per visited period. Lives only while the app runs; nothing is written to
  * disk or localStorage. Arrays are copied in and out, so callers may mutate what they pass or receive.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class WorklogCache {
   // Map keeps insertion order: re-inserting on use makes the first key the least recently used.
   private entries = new Map<string, CacheEntry>();
@@ -64,9 +64,7 @@ export class WorklogCache {
       const others: Worklog[] = entry.worklogs.filter(wl => wl.id !== worklog.id);
       if (started >= entry.start && started < entry.end) {
         const index: number = entry.worklogs.findIndex(wl => wl.id === worklog.id);
-        entry.worklogs = index > -1
-          ? entry.worklogs.map(wl => wl.id === worklog.id ? worklog : wl)
-          : [...others, worklog];
+        entry.worklogs = index > -1 ? entry.worklogs.map(wl => (wl.id === worklog.id ? worklog : wl)) : [...others, worklog];
       } else {
         entry.worklogs = others;
       }

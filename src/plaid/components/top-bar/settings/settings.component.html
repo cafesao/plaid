@@ -80,12 +80,7 @@
   </div>
   <div class="field-set">
     <label>Dark mode</label>
-    <select
-      class="input wide-dropdown"
-      [tabIndex]="dropdownOpen ? 0 : -1"
-      [ngModel]="theme"
-      (ngModelChange)="setTheme($event)"
-    >
+    <select class="input wide-dropdown" [tabIndex]="dropdownOpen ? 0 : -1" [ngModel]="theme" (ngModelChange)="setTheme($event)">
       <option value="system">System default</option>
       <option value="dark">Enabled</option>
       <option value="light">Disabled</option>

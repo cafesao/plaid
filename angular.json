@@ -16,14 +16,9 @@
             "outputPath": "build/",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [
-              "src/polyfills.ts"
-            ],
+            "polyfills": ["src/polyfills.ts"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/assets/appicon",
-              "src/assets/icons.svg"
-            ],
+            "assets": ["src/assets/appicon", "src/assets/icons.svg"],
             "styles": [
               "src/styles.scss",
               "node_modules/@openfonts/source-sans-pro_all/index.css",
@@ -82,9 +77,7 @@
             "buildTarget": "plaid:build",
             "tsConfig": "tsconfig.spec.json",
             "runner": "vitest",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "providersFile": "src/test-providers.ts"
           }
         }

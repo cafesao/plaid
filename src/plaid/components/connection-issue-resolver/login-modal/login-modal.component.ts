@@ -36,5 +36,4 @@ export class LoginModalComponent {
       this.httpNoticeVisible = this.authInfo.jiraUrl.substr(0, 7) === 'http://';
     }
   }
-
 }

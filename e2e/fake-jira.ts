@@ -122,7 +122,7 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
   });
 
   return {
-    pauseResponses: () => paused = true,
+    pauseResponses: () => (paused = true),
     resumeResponses: () => {
       paused = false;
       waiting.forEach(resolve => {

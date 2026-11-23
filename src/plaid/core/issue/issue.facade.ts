@@ -8,7 +8,7 @@ import {AuthFacade} from '../auth/auth.facade';
 import {UserPreferencesService} from '../user-preferences.service';
 import {FavoriteKeys} from '../../model/favorite-keys';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class IssueFacade {
   private favoriteKeys: FavoriteKeys;
   private favorites: Issue[];
@@ -32,26 +32,28 @@ export class IssueFacade {
 
   private getSuggestionsFromApi$(): Observable<Issue[]> {
     return this.issueApi
-      .search$('status changed by currentUser() OR creator = currentUser() order by updatedDate desc').pipe(
-        map(res => res.issues)
-      );
+      .search$('status changed by currentUser() OR creator = currentUser() order by updatedDate desc')
+      .pipe(map(res => res.issues));
   }
 
   private getFavoritesFromApi$(): Observable<Issue[]> {
     const keys: string[] = this.favoriteKeys[this.authFacade.getJiraURL()] || [];
     const removedKeysIndexes: number[] = [];
     return zip(...keys.map(key => this.issueApi.getIssue$(key))).pipe(
-      map(issues => this.setFavoriteAttribute(issues.filter((issue: Issue, index: number) => {
-        if (issue) {
-          return true;
-        } else {
-          removedKeysIndexes.push(index);
-          return false;
-        }
-      }))),
+      map(issues =>
+        this.setFavoriteAttribute(
+          issues.filter((issue: Issue, index: number) => {
+            if (issue) {
+              return true;
+            } else {
+              removedKeysIndexes.push(index);
+              return false;
+            }
+          })
+        )
+      ),
       tap(() => {
-        this.favoriteKeys[this.authFacade.getJiraURL()] =
-          keys.filter((_key: string, index: number) => !removedKeysIndexes.includes(index));
+        this.favoriteKeys[this.authFacade.getJiraURL()] = keys.filter((_key: string, index: number) => !removedKeysIndexes.includes(index));
         this.userPrefsService.setFavoriteKeys(this.favoriteKeys);
       })
     );
@@ -63,30 +65,30 @@ export class IssueFacade {
     private authFacade: AuthFacade,
     private userPrefsService: UserPreferencesService
   ) {
-    this.userPrefsService.getFavoriteKeys$().subscribe(keys => this.favoriteKeys = keys);
-    this.issueState.getFavorites$().subscribe(favorites => this.favorites = favorites);
-    this.issueState.getSuggestions$().subscribe(suggestions => this.suggestions = suggestions);
+    this.userPrefsService.getFavoriteKeys$().subscribe(keys => (this.favoriteKeys = keys));
+    this.issueState.getFavorites$().subscribe(favorites => (this.favorites = favorites));
+    this.issueState.getSuggestions$().subscribe(suggestions => (this.suggestions = suggestions));
     // Prefetch favorites and suggestions after login and reset suggestions and favorites after logout
-    this.authFacade.getAuthenticatedUser$().pipe(switchMap(user => user ? this.getSuggestionsFromApi$() : of([])))
+    this.authFacade
+      .getAuthenticatedUser$()
+      .pipe(switchMap(user => (user ? this.getSuggestionsFromApi$() : of([]))))
       .subscribe(suggestions => this.issueState.setSuggestions(suggestions));
-    this.authFacade.getAuthenticatedUser$().pipe(switchMap(user => user ? this.getFavoritesFromApi$() : of([])))
+    this.authFacade
+      .getAuthenticatedUser$()
+      .pipe(switchMap(user => (user ? this.getFavoritesFromApi$() : of([]))))
       .subscribe(favorites => this.issueState.setFavorites(favorites));
   }
 
   quickSearch$(query: string): Observable<Issue[]> {
     if (IssueFacade.stripSpecialChars(query)) {
       if (IssueFacade.canPotentiallyBeIssueKey(query)) {
-        return zip(
-          this.issueApi.getIssue$(query),
-          this.issueApi.search$(`text ~ "${IssueFacade.stripSpecialChars(query)}"`)
-        ).pipe(
-          map(([issue, searchResults]) =>
-            this.setFavoriteAttribute((issue ? [issue] : []).concat(searchResults.issues)))
+        return zip(this.issueApi.getIssue$(query), this.issueApi.search$(`text ~ "${IssueFacade.stripSpecialChars(query)}"`)).pipe(
+          map(([issue, searchResults]) => this.setFavoriteAttribute((issue ? [issue] : []).concat(searchResults.issues)))
         );
       } else {
-        return this.issueApi.search$(`text ~ "${IssueFacade.stripSpecialChars(query)}"`).pipe(
-          map(res => this.setFavoriteAttribute(res.issues))
-        );
+        return this.issueApi
+          .search$(`text ~ "${IssueFacade.stripSpecialChars(query)}"`)
+          .pipe(map(res => this.setFavoriteAttribute(res.issues)));
       }
     } else {
       return of([]);

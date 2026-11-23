@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import {defineConfig} from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
@@ -7,12 +7,12 @@ export default defineConfig({
   workers: 1,
   use: {
     baseURL: 'http://localhost:4300',
-    headless: true,
+    headless: true
   },
   webServer: {
     command: 'pnpm serve-dev',
     port: 4300,
     timeout: 120000,
-    reuseExistingServer: true,
-  },
+    reuseExistingServer: true
+  }
 });

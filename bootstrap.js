@@ -22,7 +22,8 @@ if (process.platform === 'linux' && os.release().toLowerCase().includes('microso
 }
 
 function createWindow(dev) {
-  if (!firstWindowCreated) { // Check for update once in the process (if subsequent windows are opened, don't check again)
+  if (!firstWindowCreated) {
+    // Check for update once in the process (if subsequent windows are opened, don't check again)
     autoUpdater.checkForUpdatesAndNotify(); // Note to self: don't mess that one up!
   }
 
@@ -70,25 +71,31 @@ function createWindow(dev) {
           label: 'Undo',
           role: 'undo',
           enabled: params.editFlags.canUndo
-        }, {
+        },
+        {
           label: 'Redo',
           role: 'redo',
           enabled: params.editFlags.canRedo
-        }, {
-          type: 'separator',
-        }, {
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Cut',
           role: 'cut',
           enabled: params.editFlags.canCut
-        }, {
+        },
+        {
           label: 'Copy',
           role: 'copy',
           enabled: params.editFlags.canCopy
-        }, {
+        },
+        {
           label: 'Paste',
           role: 'paste',
           enabled: params.editFlags.canPaste
-        }, {
+        },
+        {
           label: 'Select all',
           role: 'selectAll',
           enabled: params.editFlags.canSelectAll
@@ -111,7 +118,7 @@ function createWindow(dev) {
   firstWindowCreated = true;
 }
 
-module.exports = (dev) => {
+module.exports = dev => {
   if (app.requestSingleInstanceLock()) {
     app.on('ready', () => createWindow(dev));
     app.on('second-instance', () => createWindow(dev));

@@ -15,7 +15,7 @@ describe('WorklogCache', () => {
     return {start: new Date(2026, 0, 1 + 7 * n), end: new Date(2026, 0, 7 + 7 * n)};
   }
 
-  beforeEach(() => cache = new WorklogCache());
+  beforeEach(() => (cache = new WorklogCache()));
 
   it('returns what was stored for the same range', () => {
     const worklogs = [worklog('1', new Date(2026, 10, 24, 9))];
@@ -43,7 +43,10 @@ describe('WorklogCache', () => {
     cache.upsert(worklog('1', new Date(2026, 10, 24, 9), 1800));
     cache.upsert(worklog('2', new Date(2026, 10, 29, 23, 30)));
 
-    expect(cache.get(weekA).map(wl => [wl.id, wl.timeSpentSeconds])).toEqual([['1', 1800], ['2', 900]]);
+    expect(cache.get(weekA).map(wl => [wl.id, wl.timeSpentSeconds])).toEqual([
+      ['1', 1800],
+      ['2', 900]
+    ]);
     expect(cache.get(weekB)).toEqual([]);
   });
 

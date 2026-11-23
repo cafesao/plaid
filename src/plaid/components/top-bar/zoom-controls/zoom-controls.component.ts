@@ -32,23 +32,30 @@ export class ZoomControlsComponent implements OnInit {
   ngOnInit(): void {
     this.emitChange();
     // Singleton component, no need to unbind events
-    addEventListener('wheel', (e: WheelEvent) => { // Ctrl mouse wheel, Ctrl two finger swipe, pinch
-      if (!this.shortcutsDisabled && e.ctrlKey) {
-        this.pixelsPerMinuteExponent -= e.deltaY / 800;
-        this.emitChange();
-        e.preventDefault();
-      }
-    }, {passive: false});
+    addEventListener(
+      'wheel',
+      (e: WheelEvent) => {
+        // Ctrl mouse wheel, Ctrl two finger swipe, pinch
+        if (!this.shortcutsDisabled && e.ctrlKey) {
+          this.pixelsPerMinuteExponent -= e.deltaY / 800;
+          this.emitChange();
+          e.preventDefault();
+        }
+      },
+      {passive: false}
+    );
     addEventListener('keydown', (e: KeyboardEvent) => {
       if (!this.shortcutsDisabled && e.ctrlKey && !e.repeat) {
-        if (e.key === '-' || e.key === '_') { // Ctrl -, Ctrl _
+        if (e.key === '-' || e.key === '_') {
+          // Ctrl -, Ctrl _
           this.zoomOutButtonActive = true;
           this.zoomOut();
-          setTimeout(() => this.zoomOutButtonActive = false, 50);
-        } else if (e.key === '+' || e.key === '=') { // Ctrl +, Ctrl =
+          setTimeout(() => (this.zoomOutButtonActive = false), 50);
+        } else if (e.key === '+' || e.key === '=') {
+          // Ctrl +, Ctrl =
           this.zoomInButtonActive = true;
           this.zoomIn();
-          setTimeout(() => this.zoomInButtonActive = false, 50);
+          setTimeout(() => (this.zoomInButtonActive = false), 50);
         }
       }
     });

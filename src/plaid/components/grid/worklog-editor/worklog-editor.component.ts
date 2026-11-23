@@ -213,8 +213,7 @@ export class WorklogEditorComponent implements OnInit {
     private authFacade: AuthFacade,
     private worklogFacade: WorklogFacade,
     private appStateService: AppStateService
-  ) {
-  }
+  ) {}
 
   /**
    * When user changes authentication data, the editor should close.
@@ -252,15 +251,19 @@ export class WorklogEditorComponent implements OnInit {
           }
           break;
         case 'Enter':
-          if (!this.calendarOpen && !this.issuePickerOpen && document.activeElement !== this.cancelButton.nativeElement
-            && !(document.activeElement === this.commentTextArea.nativeElement && !event.ctrlKey)) {
+          if (
+            !this.calendarOpen &&
+            !this.issuePickerOpen &&
+            document.activeElement !== this.cancelButton.nativeElement &&
+            !(document.activeElement === this.commentTextArea.nativeElement && !event.ctrlKey)
+          ) {
             this.save();
           }
           break;
       }
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Puts the edited panel in the correct offset, gives it correct size and does layout checks according to edited
@@ -268,10 +271,7 @@ export class WorklogEditorComponent implements OnInit {
    */
   computeSizeAndOffset(): void {
     this.panelOffsetTop = (this.start.getHours() * 60 + this.start.getMinutes()) * this.pixelsPerMinute;
-    this.panelHeight = Math.min(
-      this.durationMinutes * this.pixelsPerMinute,
-      1440 * this.pixelsPerMinute - this.panelOffsetTop
-    );
+    this.panelHeight = Math.min(this.durationMinutes * this.pixelsPerMinute, 1440 * this.pixelsPerMinute - this.panelOffsetTop);
     this.panelWidth = 1 / (Math.round((this.dateRange.end.getTime() - this.dateRange.start.getTime()) / 86400000) + 1);
     this.panelOffsetLeft = this.panelWidth * Math.round((this.date.getTime() - this.dateRange.start.getTime()) / 86400000);
     this.spaceUnderPanel = 1440 * this.pixelsPerMinute - this.panelOffsetTop - this.panelHeight;
@@ -310,9 +310,11 @@ export class WorklogEditorComponent implements OnInit {
     const oldStartTimeMinutes: number = this.start.getHours() * 60 + this.start.getMinutes();
     let newStartTimeMinutes: number = this.getPointerTopOffsetMinutes(event, this.getSnapTo(event));
     if (oldStartTimeMinutes !== newStartTimeMinutes) {
-      if (newStartTimeMinutes < 0) { // Prevent dragging above the grid
+      if (newStartTimeMinutes < 0) {
+        // Prevent dragging above the grid
         newStartTimeMinutes = 0;
-      } else if (newStartTimeMinutes + this.durationMinutes > 1440) { // Prevent dragging below the grid
+      } else if (newStartTimeMinutes + this.durationMinutes > 1440) {
+        // Prevent dragging below the grid
         newStartTimeMinutes = 1440 - this.durationMinutes;
       }
       this.start.setHours(0, newStartTimeMinutes, 0, 0);
@@ -326,12 +328,18 @@ export class WorklogEditorComponent implements OnInit {
     const pixelsPerDay: number = (this.gridElement.scrollWidth - WorklogEditorComponent.GRID_OFFSET_LEFT) * this.panelWidth;
     const oldDate: Date = new Date(this.date);
     const newDate: Date = new Date(this.dateRange.start);
-    newDate.setDate(newDate.getDate() + Math.round((event.clientX + this.gridElement.scrollLeft -
-      WorklogEditorComponent.GRID_OFFSET_LEFT - this.mouseEventXOffset) / pixelsPerDay));
+    newDate.setDate(
+      newDate.getDate() +
+        Math.round(
+          (event.clientX + this.gridElement.scrollLeft - WorklogEditorComponent.GRID_OFFSET_LEFT - this.mouseEventXOffset) / pixelsPerDay
+        )
+    );
     if (oldDate.getTime() !== newDate.getTime()) {
-      if (newDate < this.dateRange.start) { // Prevent dragging to before the visible date range
+      if (newDate < this.dateRange.start) {
+        // Prevent dragging to before the visible date range
         this.date = new Date(this.dateRange.start);
-      } else if (newDate > this.dateRange.end) { // Prevent dragging to after the visible date range
+      } else if (newDate > this.dateRange.end) {
+        // Prevent dragging to after the visible date range
         this.date = new Date(this.dateRange.end);
       } else {
         this.date = newDate;
@@ -344,7 +352,7 @@ export class WorklogEditorComponent implements OnInit {
       this.computeSizeAndOffset();
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Initiates top stretch handle dragging, adds event listeners for mouse movement and button release
@@ -385,9 +393,11 @@ export class WorklogEditorComponent implements OnInit {
     const endTimeMinutes: number = oldStartTimeMinutes + this.durationMinutes;
     let newStartTimeMinutes: number = this.getPointerTopOffsetMinutes(event, snapTo);
     if (oldStartTimeMinutes !== newStartTimeMinutes) {
-      if (newStartTimeMinutes < 0) { // Prevent stretching above the upper bound of the grid
+      if (newStartTimeMinutes < 0) {
+        // Prevent stretching above the upper bound of the grid
         newStartTimeMinutes = 0;
-      } else if (newStartTimeMinutes >= endTimeMinutes) { // Prevent stretching below the lower bound of the work log entry
+      } else if (newStartTimeMinutes >= endTimeMinutes) {
+        // Prevent stretching below the lower bound of the work log entry
         newStartTimeMinutes = Math.floor((endTimeMinutes - 1) / snapTo) * snapTo;
       }
       this.start.setHours(0, newStartTimeMinutes, 0, 0);
@@ -397,7 +407,7 @@ export class WorklogEditorComponent implements OnInit {
       this.computeSizeAndOffset();
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Handles mouse movement during top stretch handle dragging calculating change in work duration
@@ -408,9 +418,11 @@ export class WorklogEditorComponent implements OnInit {
     const oldEndTimeMinutes: number = startTimeMinutes + this.durationMinutes;
     let newEndTimeMinutes: number = this.getPointerTopOffsetMinutes(event, snapTo);
     if (oldEndTimeMinutes !== newEndTimeMinutes) {
-      if (newEndTimeMinutes <= startTimeMinutes) { // Prevent stretching above the upper bound of the work log entry
+      if (newEndTimeMinutes <= startTimeMinutes) {
+        // Prevent stretching above the upper bound of the work log entry
         newEndTimeMinutes = Math.ceil((startTimeMinutes + 1) / snapTo) * snapTo;
-      } else if (newEndTimeMinutes > 1440) { // Prevent stretching below the grid
+      } else if (newEndTimeMinutes > 1440) {
+        // Prevent stretching below the grid
         newEndTimeMinutes = 1440;
       }
       this.durationMinutes = newEndTimeMinutes - startTimeMinutes;
@@ -421,7 +433,7 @@ export class WorklogEditorComponent implements OnInit {
       this.computeSizeAndOffset();
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Returns what interval of minutes should dragging events snap to according to what modifier keys on keyboard are
@@ -443,18 +455,20 @@ export class WorklogEditorComponent implements OnInit {
    * Returns number of minutes from start of the day according to what the mouse points at, rounded to snapTo interval
    */
   getPointerTopOffsetMinutes(event: MouseEvent, snapTo: number): number {
-    return Math.round(
-      (event.clientY + this.gridElement.scrollTop - WorklogEditorComponent.GRID_OFFSET_TOP - this.mouseEventYOffset)
-      / this.pixelsPerMinute / snapTo
-    ) * snapTo;
+    return (
+      Math.round(
+        (event.clientY + this.gridElement.scrollTop - WorklogEditorComponent.GRID_OFFSET_TOP - this.mouseEventYOffset) /
+          this.pixelsPerMinute /
+          snapTo
+      ) * snapTo
+    );
   }
 
   /**
    * Closes the editor if user clicked outside the panel with left mouse button
    */
   handleClickOutsideEditor(event: MouseEvent): void {
-    if (event.button === 0 && event.target === this.wrapper.nativeElement && !this.calendarOpen && !this.issuePickerOpen
-      && !this.saving) {
+    if (event.button === 0 && event.target === this.wrapper.nativeElement && !this.calendarOpen && !this.issuePickerOpen && !this.saving) {
       this.close();
     }
   }
@@ -493,8 +507,10 @@ export class WorklogEditorComponent implements OnInit {
       this.computeSizeAndOffset();
 
       const mousedownOutsideCalendarEventListener = (event: MouseEvent) => {
-        if (!(this.calendarCloud.element.nativeElement as Node).contains(event.target as Node)
-          && event.target !== this.calendarToggle.nativeElement) {
+        if (
+          !(this.calendarCloud.element.nativeElement as Node).contains(event.target as Node) &&
+          event.target !== this.calendarToggle.nativeElement
+        ) {
           this.calendarOpen = false;
           removeEventListener('mousedown', mousedownOutsideCalendarEventListener);
 
@@ -517,8 +533,10 @@ export class WorklogEditorComponent implements OnInit {
       this.computeSizeAndOffset();
 
       const mousedownOutsideIssuePickerEventListener = (event: MouseEvent) => {
-        if (!(this.issuePickerCloud.element.nativeElement as Node).contains(event.target as Node)
-          && event.target !== this.issuePickerToggle.nativeElement) {
+        if (
+          !(this.issuePickerCloud.element.nativeElement as Node).contains(event.target as Node) &&
+          event.target !== this.issuePickerToggle.nativeElement
+        ) {
           this.issuePickerOpen = false;
           removeEventListener('mousedown', mousedownOutsideIssuePickerEventListener);
 
@@ -538,23 +556,21 @@ export class WorklogEditorComponent implements OnInit {
   save(): void {
     this.saving = true;
     if (this.adding) {
-      this.worklogFacade.addWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString)
-        .subscribe({
-          next: () => this.close(),
-          complete: () => {
-            this.saving = false;
-            this.cdr.detectChanges();
-          }
-        });
+      this.worklogFacade.addWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
+        next: () => this.close(),
+        complete: () => {
+          this.saving = false;
+          this.cdr.detectChanges();
+        }
+      });
     } else {
-      this.worklogFacade.updateWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString)
-        .subscribe({
-          next: () => this.close(),
-          complete: () => {
-            this.saving = false;
-            this.cdr.detectChanges();
-          }
-        });
+      this.worklogFacade.updateWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
+        next: () => this.close(),
+        complete: () => {
+          this.saving = false;
+          this.cdr.detectChanges();
+        }
+      });
     }
   }
 
@@ -574,9 +590,7 @@ export class WorklogEditorComponent implements OnInit {
   }
 
   updatePanelHueSaturationAndIssueString(issue?: Issue, defaultIssueString: string = '···'): void {
-    this.panelHue = issue ? Math.round((Number(issue.fields.parent
-      ? issue.fields.parent.id
-      : issue.id) * 360 / 1.61803)) % 360 : 0;
+    this.panelHue = issue ? Math.round((Number(issue.fields.parent ? issue.fields.parent.id : issue.id) * 360) / 1.61803) % 360 : 0;
     this.panelSaturation = issue ? 50 : 0;
     this.issueString = issue ? `${issue.key} - ${issue.fields.summary}` : defaultIssueString;
   }

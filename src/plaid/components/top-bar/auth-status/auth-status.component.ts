@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
 import {User} from '../../../model/user';
 import {environment} from '../../../../environments/environment';
 
@@ -40,7 +32,10 @@ export class AuthStatusComponent {
   @Output()
   forgetAccount = new EventEmitter<null>();
 
-  constructor(private ref: ElementRef, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private ref: ElementRef,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   /**
    * Closes dropdown menu, if user clicked anywhere outside it.
@@ -50,7 +45,7 @@ export class AuthStatusComponent {
       this.dropdownOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Closes dropdown menu, if user presses Escape.
@@ -60,7 +55,7 @@ export class AuthStatusComponent {
       this.dropdownOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 
   set dropdownOpen(value: boolean) {
     this._dropdownOpen = value;
@@ -90,5 +85,4 @@ export class AuthStatusComponent {
       return this.user.avatarUrls[sizes[sizes.length - 1]];
     }
   }
-
 }

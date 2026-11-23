@@ -23,10 +23,10 @@ export class RefreshButtonComponent implements OnInit {
   ngOnInit(): void {
     // Singleton component, no need to unbind
     addEventListener('keydown', (e: KeyboardEvent) => {
-      if ((e.key === 'F5' || e.key.toLowerCase() === 'r' && e.ctrlKey) && !this.shortcutsDisabled && !e.repeat) {
+      if ((e.key === 'F5' || (e.key.toLowerCase() === 'r' && e.ctrlKey)) && !this.shortcutsDisabled && !e.repeat) {
         this.buttonActive = true;
         this.button.nativeElement.click();
-        setTimeout(() => this.buttonActive = false, 50);
+        setTimeout(() => (this.buttonActive = false), 50);
       }
     });
   }

@@ -1,5 +1,5 @@
-import { WorklogState } from './worklog.state';
-import { Worklog } from '../../model/worklog';
+import {WorklogState} from './worklog.state';
+import {Worklog} from '../../model/worklog';
 
 // The state is backed by BehaviorSubjects, which emit synchronously: each test collects the emissions and asserts
 // on them after the action, so every assertion always runs.
@@ -34,8 +34,8 @@ describe('WorklogState', () => {
 
     it('should emit worklogs when set', () => {
       const worklogs: Worklog[] = [
-        { id: '1', issueId: '100', timeSpentSeconds: 3600 },
-        { id: '2', issueId: '200', timeSpentSeconds: 7200 }
+        {id: '1', issueId: '100', timeSpentSeconds: 3600},
+        {id: '2', issueId: '200', timeSpentSeconds: 7200}
       ];
       const emissions: Worklog[][] = [];
       state.getWorklogs$().subscribe(val => emissions.push(val));
@@ -47,7 +47,7 @@ describe('WorklogState', () => {
 
   describe('addOrUpdateWorklog', () => {
     it('should add a new worklog', () => {
-      const worklog: Worklog = { id: '1', issueId: '100', timeSpentSeconds: 3600 };
+      const worklog: Worklog = {id: '1', issueId: '100', timeSpentSeconds: 3600};
       const emissions: Worklog[][] = [];
       state.getWorklogs$().subscribe(val => emissions.push(val));
       state.addOrUpdateWorklog(worklog);
@@ -57,8 +57,8 @@ describe('WorklogState', () => {
     });
 
     it('should update an existing worklog by id', () => {
-      const original: Worklog = { id: '1', issueId: '100', timeSpentSeconds: 3600 };
-      const updated: Worklog = { id: '1', issueId: '100', timeSpentSeconds: 7200 };
+      const original: Worklog = {id: '1', issueId: '100', timeSpentSeconds: 3600};
+      const updated: Worklog = {id: '1', issueId: '100', timeSpentSeconds: 7200};
 
       state.setWorklogs([original]);
 
@@ -74,8 +74,8 @@ describe('WorklogState', () => {
   describe('deleteWorklog', () => {
     it('should remove a worklog by id', () => {
       const worklogs: Worklog[] = [
-        { id: '1', issueId: '100' },
-        { id: '2', issueId: '200' }
+        {id: '1', issueId: '100'},
+        {id: '2', issueId: '200'}
       ];
       state.setWorklogs(worklogs);
 
@@ -88,7 +88,7 @@ describe('WorklogState', () => {
     });
 
     it('should do nothing if worklog id not found', () => {
-      const worklogs: Worklog[] = [{ id: '1', issueId: '100' }];
+      const worklogs: Worklog[] = [{id: '1', issueId: '100'}];
       state.setWorklogs(worklogs);
 
       const emissions: Worklog[][] = [];

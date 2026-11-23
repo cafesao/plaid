@@ -16,40 +16,11 @@ export class Calendar {
     'December'
   ];
 
-  static readonly monthsShort: string[] = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec'
-  ];
+  static readonly monthsShort: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  static readonly weekdays: string[] = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday'
-  ];
+  static readonly weekdays: string[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-  static readonly weekdaysShort: string[] = [
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat'
-  ];
+  static readonly weekdaysShort: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   /**
    * Returns array of 7-element arrays of days visible on a calendar presenting given month. The structure contains all
@@ -61,11 +32,7 @@ export class Calendar {
     const maxDate: number = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
     const days: Date[][] = [];
     for (let i = -month.getDay(); i < maxDate; i += 7) {
-      days.push(
-        Array
-          .from<number>({ length: 7 })
-          .map((_, j: number) => new Date(month.getFullYear(), month.getMonth(), i + j + 1))
-      );
+      days.push(Array.from<number>({length: 7}).map((_, j: number) => new Date(month.getFullYear(), month.getMonth(), i + j + 1)));
     }
     return days;
   }

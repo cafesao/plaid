@@ -46,9 +46,13 @@ export class WorklogPanelsManagerService {
       if (this.timeout != null) {
         clearTimeout(this.timeout);
       }
-      this.timeout = setTimeout(() => this.panels.forEach(panel => {
-        panel.checkSizeAndPosition();
-      }), 250);
+      this.timeout = setTimeout(
+        () =>
+          this.panels.forEach(panel => {
+            panel.checkSizeAndPosition();
+          }),
+        250
+      );
     }
   }
 }

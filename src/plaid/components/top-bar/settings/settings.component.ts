@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output} from '@angular/core';
 import {Calendar} from '../../../helpers/calendar';
 import {Theme} from '../../../model/theme';
 
@@ -23,23 +15,25 @@ import {Theme} from '../../../model/theme';
 export class SettingsComponent {
   private _dropdownOpen = false;
   readonly weekdays: string[] = Calendar.weekdays;
-  @Input()  workingHoursStartMinutes: number;
+  @Input() workingHoursStartMinutes: number;
   @Output() workingHoursStartMinutesChange = new EventEmitter<number>();
-  @Input()  workingHoursEndMinutes: number;
+  @Input() workingHoursEndMinutes: number;
   @Output() workingHoursEndMinutesChange = new EventEmitter<number>();
-  @Input()  workingDaysStart: number;
+  @Input() workingDaysStart: number;
   @Output() workingDaysStartChange = new EventEmitter<number>();
-  @Input()  workingDaysEnd: number;
+  @Input() workingDaysEnd: number;
   @Output() workingDaysEndChange = new EventEmitter<number>();
-  @Input()  hideWeekend: boolean;
+  @Input() hideWeekend: boolean;
   @Output() hideWeekendChange = new EventEmitter<boolean>();
-  @Input()  refreshIntervalMinutes: number;
+  @Input() refreshIntervalMinutes: number;
   @Output() refreshIntervalMinutesChange = new EventEmitter<number>();
-  @Input()  theme: Theme;
+  @Input() theme: Theme;
   @Output() themeChange = new EventEmitter<Theme>();
 
-  constructor(private ref: ElementRef, private cdr: ChangeDetectorRef) {
-  }
+  constructor(
+    private ref: ElementRef,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   setWorkingHoursStartMinutes(value: number) {
     // Values are emitted only after initialization and only if they change
@@ -103,7 +97,7 @@ export class SettingsComponent {
       this.dropdownOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Closes dropdown, if user presses Escape.
@@ -113,7 +107,7 @@ export class SettingsComponent {
       this.dropdownOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 
   set dropdownOpen(value: boolean) {
     this._dropdownOpen = value;

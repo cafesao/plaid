@@ -18,11 +18,11 @@ export interface Issue {
     };
     summary?: string;
     status?: {
-      name: string,
+      name: string;
       statusCategory?: {
         colorName: string;
-      }
-    }
+      };
+    };
   };
   renderedFields?: Record<string, unknown>;
   properties?: any;

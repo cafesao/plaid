@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {Calendar} from '../../../../helpers/calendar';
 
 /**
@@ -105,7 +99,7 @@ export class DatePickerCloudComponent {
       month.setDate(1);
       this.month = month;
     }
-  }
+  };
 
   decrementMonth(): void {
     this.month = new Date(this.month.getFullYear(), this.month.getMonth() - 1);

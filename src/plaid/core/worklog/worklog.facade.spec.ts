@@ -19,7 +19,7 @@ const OTHER_USER: User = {self: 'https://jira.test/rest/api/2/user?accountId=u2'
 const WEEK_A: DateRange = {start: new Date(2026, 10, 23), end: new Date(2026, 10, 29)};
 const WEEK_B: DateRange = {start: new Date(2026, 10, 30), end: new Date(2026, 11, 6)};
 
-type ApiMock = { [K in keyof WorklogApi]: Mock };
+type ApiMock = {[K in keyof WorklogApi]: Mock};
 
 function createFacade(initialRange: DateRange = WEEK_A) {
   const api = {
@@ -73,27 +73,41 @@ function oneWorklogPerIssue(issueId: string): Observable<WorklogWithPagination> 
 
 function currentWorklogs(state: WorklogState): Worklog[] {
   let value: Worklog[] = [];
-  state.getWorklogs$().subscribe(worklogs => value = worklogs).unsubscribe();
+  state
+    .getWorklogs$()
+    .subscribe(worklogs => (value = worklogs))
+    .unsubscribe();
   return value;
 }
 
 function currentFetching(state: WorklogState): boolean {
   let value = false;
-  state.getFetching$().subscribe(fetching => value = fetching).unsubscribe();
+  state
+    .getFetching$()
+    .subscribe(fetching => (value = fetching))
+    .unsubscribe();
   return value;
 }
 
 function ids(state: WorklogState): string[] {
-  return currentWorklogs(state).map(wl => wl.id).sort();
+  return currentWorklogs(state)
+    .map(wl => wl.id)
+    .sort();
 }
 
 /** Serves each range's worklogs (one issue per worklog, issue id = worklog issueId) from a map keyed by range start. */
 function serveRanges(api: ApiMock, data: Map<number, Worklog[]>): void {
   const forRange = (range: DateRange) => data.get(range.start.getTime()) || [];
   api.getIssuesForWorklogDateRange$.mockImplementation((range: DateRange) =>
-    searchPage(forRange(range).map(wl => issue(Number(wl.issueId))), undefined, true));
+    searchPage(
+      forRange(range).map(wl => issue(Number(wl.issueId))),
+      undefined,
+      true
+    )
+  );
   api.getWorklogsForIssue$.mockImplementation((id: string, range: DateRange) =>
-    worklogPage(forRange(range).filter(wl => wl.issueId === id)));
+    worklogPage(forRange(range).filter(wl => wl.issueId === id))
+  );
 }
 
 /** Makes every new search wait until the returned subject emits; worklog requests keep being served. */
@@ -113,7 +127,8 @@ describe('WorklogFacade', () => {
     it('reads every search page until isLast', () => {
       const {api, state, user$} = createFacade();
       api.getIssuesForWorklogDateRange$.mockImplementation((_range: DateRange, token?: string) =>
-        token === 'p2' ? searchPage(issues(101, 5), undefined, true) : searchPage(issues(1, 100), 'p2', false));
+        token === 'p2' ? searchPage(issues(101, 5), undefined, true) : searchPage(issues(1, 100), 'p2', false)
+      );
       api.getWorklogsForIssue$.mockImplementation(oneWorklogPerIssue);
 
       user$.next(USER);
@@ -159,10 +174,9 @@ describe('WorklogFacade', () => {
     it('includes a worklog at 23:30 on the last visible day and excludes one at 00:00 the next day', () => {
       const {api, state, user$} = createFacade();
       api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(1)], undefined, true));
-      api.getWorklogsForIssue$.mockReturnValue(worklogPage([
-        worklog('late', new Date(2026, 10, 29, 23, 30)),
-        worklog('next-day', new Date(2026, 10, 30, 0, 0))
-      ]));
+      api.getWorklogsForIssue$.mockReturnValue(
+        worklogPage([worklog('late', new Date(2026, 10, 29, 23, 30)), worklog('next-day', new Date(2026, 10, 30, 0, 0))])
+      );
 
       user$.next(USER);
 
@@ -172,10 +186,9 @@ describe('WorklogFacade', () => {
     it('ignores worklogs from other authors on the same issue', () => {
       const {api, state, user$} = createFacade();
       api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(1)], undefined, true));
-      api.getWorklogsForIssue$.mockReturnValue(worklogPage([
-        worklog('mine', new Date(2026, 10, 24, 9, 0)),
-        worklog('theirs', new Date(2026, 10, 24, 10, 0), OTHER_USER)
-      ]));
+      api.getWorklogsForIssue$.mockReturnValue(
+        worklogPage([worklog('mine', new Date(2026, 10, 24, 9, 0)), worklog('theirs', new Date(2026, 10, 24, 10, 0), OTHER_USER)])
+      );
 
       user$.next(USER);
 
@@ -188,7 +201,8 @@ describe('WorklogFacade', () => {
       const secondPage = Array.from({length: 10}, (_, i) => worklog(`b${i}`, new Date(2026, 10, 25, 8, i)));
       api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(7)], undefined, true));
       api.getWorklogsForIssue$.mockImplementation((_id: string, _range: DateRange, startAt = 0) =>
-        startAt === 50 ? worklogPage(secondPage, 50, 60) : worklogPage(firstPage, 0, 60));
+        startAt === 50 ? worklogPage(secondPage, 50, 60) : worklogPage(firstPage, 0, 60)
+      );
 
       user$.next(USER);
 
@@ -219,7 +233,10 @@ describe('WorklogFacade', () => {
     /** Logs in on week A, then visits week B; both load from Jira and end up cached. */
     function visitAThenB() {
       const setup = createFacade(WEEK_A);
-      const data = new Map<number, Worklog[]>([[WEEK_A.start.getTime(), [A1, A2]], [WEEK_B.start.getTime(), [B1]]]);
+      const data = new Map<number, Worklog[]>([
+        [WEEK_A.start.getTime(), [A1, A2]],
+        [WEEK_B.start.getTime(), [B1]]
+      ]);
       serveRanges(setup.api, data);
       setup.user$.next(USER);
       setup.range$.next(WEEK_B);
@@ -306,7 +323,10 @@ describe('WorklogFacade', () => {
       const added = worklog('9', new Date(2026, 10, 27, 14, 0));
       api.addWorklog$.mockReturnValue(of(added));
       facade.addWorklog$({issueId: '9'}, new Date(2026, 10, 27, 14, 0), 900, '').subscribe();
-      const data = new Map<number, Worklog[]>([[WEEK_A.start.getTime(), [A1, added]], [WEEK_B.start.getTime(), [B1]]]);
+      const data = new Map<number, Worklog[]>([
+        [WEEK_A.start.getTime(), [A1, added]],
+        [WEEK_B.start.getTime(), [B1]]
+      ]);
       serveRanges(api, data);
       releaseSearch(search, [A1]); // the first load started before the save answers without it
       expect(ids(state)).toEqual(['1', '9']);
@@ -353,8 +373,7 @@ describe('WorklogFacade', () => {
       const {api, state, user$, range$} = createFacade(WEEK_A);
       // Week A: issue 1 answers, issue 2 never does, so A is only partially loaded when the user moves on.
       api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(1), issue(2)], undefined, true));
-      api.getWorklogsForIssue$.mockImplementation((id: string) =>
-        id === '1' ? worklogPage([A1]) : new Subject<WorklogWithPagination>());
+      api.getWorklogsForIssue$.mockImplementation((id: string) => (id === '1' ? worklogPage([A1]) : new Subject<WorklogWithPagination>()));
       user$.next(USER);
       expect(ids(state)).toEqual(['1']);
 

@@ -1,15 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  ViewChild,
-  ElementRef
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef} from '@angular/core';
 import Timeout = NodeJS.Timeout;
-import { Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 
 /**
  * Dumb component, presents lost connection modal and delegates actions to parent component.

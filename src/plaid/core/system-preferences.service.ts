@@ -3,7 +3,7 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {UserPreferencesService} from './user-preferences.service';
 import './electron-api';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class SystemPreferencesService {
   private darkModeSubject = new BehaviorSubject<boolean>(false);
 

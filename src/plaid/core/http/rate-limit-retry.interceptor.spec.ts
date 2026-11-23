@@ -41,7 +41,7 @@ describe('RateLimitRetryInterceptor', () => {
 
   it('retries after Retry-After seconds on 429 and returns the later success', () => {
     let value: unknown;
-    http.get('/rest/api/2/issue/1/worklog').subscribe(response => value = response);
+    http.get('/rest/api/2/issue/1/worklog').subscribe(response => (value = response));
 
     controller.expectOne(url).flush(null, tooManyRequests('1'));
     vi.advanceTimersByTime(999);
@@ -54,7 +54,7 @@ describe('RateLimitRetryInterceptor', () => {
 
   it('waits 2000 ms when Retry-After is missing', () => {
     let value: unknown;
-    http.get('/rest/api/2/issue/1/worklog').subscribe(response => value = response);
+    http.get('/rest/api/2/issue/1/worklog').subscribe(response => (value = response));
 
     controller.expectOne(url).flush(null, tooManyRequests());
     vi.advanceTimersByTime(RATE_LIMIT_DEFAULT_DELAY_MS - 1);
@@ -68,7 +68,7 @@ describe('RateLimitRetryInterceptor', () => {
 
   it('gives up after 3 retries and propagates the 429', () => {
     let error: HttpErrorResponse;
-    http.get('/rest/api/2/issue/1/worklog').subscribe({error: e => error = e});
+    http.get('/rest/api/2/issue/1/worklog').subscribe({error: e => (error = e)});
 
     let requests = 0;
     for (let attempt = 0; attempt <= RATE_LIMIT_MAX_RETRIES; attempt++) {
@@ -85,7 +85,7 @@ describe('RateLimitRetryInterceptor', () => {
 
   it('does not retry other errors', () => {
     let error: HttpErrorResponse;
-    http.get('/rest/api/2/issue/1/worklog').subscribe({error: e => error = e});
+    http.get('/rest/api/2/issue/1/worklog').subscribe({error: e => (error = e)});
 
     controller.expectOne(url).flush(null, {status: 500, statusText: 'Server Error'});
     vi.advanceTimersByTime(10000);

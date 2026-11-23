@@ -22,7 +22,9 @@ img {
   padding: 0 0 20px;
   top: 20px;
   right: 0;
-  transition: 0.25s opacity, 0.25s top;
+  transition:
+    0.25s opacity,
+    0.25s top;
 
   &::before {
     content: ' ';

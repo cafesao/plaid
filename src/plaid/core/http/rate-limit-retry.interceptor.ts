@@ -20,9 +20,10 @@ export class RateLimitRetryInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       retry({
         count: RATE_LIMIT_MAX_RETRIES,
-        delay: (error: unknown) => error instanceof HttpErrorResponse && error.status === 429
-          ? timer(RateLimitRetryInterceptor.retryDelayMs(error))
-          : throwError(() => error)
+        delay: (error: unknown) =>
+          error instanceof HttpErrorResponse && error.status === 429
+            ? timer(RateLimitRetryInterceptor.retryDelayMs(error))
+            : throwError(() => error)
       })
     );
   }

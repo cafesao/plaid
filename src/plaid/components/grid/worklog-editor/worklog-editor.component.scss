@@ -6,7 +6,7 @@
   bottom: 25px;
   right: 0;
   pointer-events: none;
-  background: rgba(50,50,50,0.3);
+  background: rgba(50, 50, 50, 0.3);
   opacity: 0;
   transition: 0.1s opacity;
   overflow: hidden;
@@ -15,12 +15,14 @@
     pointer-events: all;
     opacity: 1;
 
-    &.dragging, &.stretching {
+    &.dragging,
+    &.stretching {
       * {
         pointer-events: none;
       }
 
-      .start-time, .end-time {
+      .start-time,
+      .end-time {
         opacity: 1;
       }
     }
@@ -114,7 +116,8 @@
   }
 }
 
-.handle-top, .handle-bottom {
+.handle-top,
+.handle-bottom {
   background: #fff;
   border-width: 1px;
   border-style: solid;
@@ -149,10 +152,15 @@
   bottom: -5px;
 }
 
-.start-time, .end-time {
+.start-time,
+.end-time {
   position: absolute;
   right: calc(50% + 25px);
-  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+  text-shadow:
+    0 1px 0 #fff,
+    0 -1px 0 #fff,
+    1px 0 0 #fff,
+    -1px 0 0 #fff;
   line-height: 1;
   pointer-events: none;
   opacity: 0;
@@ -183,12 +191,12 @@
   min-width: 4em;
 
   .spinner {
-    color: var(--color-primary-5)
+    color: var(--color-primary-5);
   }
 }
 
 input.cloud-open {
-  box-shadow: none!important;
+  box-shadow: none !important;
 
   &#calendar-toggle {
     background-color: rgba(0, 0, 0, 0.2);

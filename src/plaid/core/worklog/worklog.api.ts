@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Worklog } from '../../model/worklog';
-import { HttpClient } from '@angular/common/http';
-import { SearchResults } from '../../model/search-results';
-import { formatDate } from '@angular/common';
-import { Observable } from 'rxjs';
-import { WorklogWithPagination } from '../../model/worklog-with-pagination';
-import { DateRange } from '../../model/date-range';
-import { Calendar } from '../../helpers/calendar';
+import {Injectable} from '@angular/core';
+import {Worklog} from '../../model/worklog';
+import {HttpClient} from '@angular/common/http';
+import {SearchResults} from '../../model/search-results';
+import {formatDate} from '@angular/common';
+import {Observable} from 'rxjs';
+import {WorklogWithPagination} from '../../model/worklog-with-pagination';
+import {DateRange} from '../../model/date-range';
+import {Calendar} from '../../helpers/calendar';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class WorklogApi {
   private readonly searchUrl = '/rest/api/3/search/jql';
   private readonly getWorklogsUrl = '/rest/api/2/issue/{issueIdOrKey}/worklog';
@@ -17,7 +17,7 @@ export class WorklogApi {
   private readonly deleteWorklogUrl = '/rest/api/2/issue/{issueIdOrKey}/worklog/{id}';
   private readonly searchPageSize = 100;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * Emits a page of issues with the user's work logs in the date range, directly as fetched from API. Pass the
@@ -29,13 +29,18 @@ export class WorklogApi {
   getIssuesForWorklogDateRange$(dateRange: DateRange, nextPageToken?: string): Observable<SearchResults> {
     const jqlStart = new Date(dateRange.start.getFullYear(), dateRange.start.getMonth(), dateRange.start.getDate() - 1);
     const jqlEnd = new Date(dateRange.end.getFullYear(), dateRange.end.getMonth(), dateRange.end.getDate() + 1);
-    let url = this.searchUrl
-      + '?fields=components,issuetype,parent,priority,summary,status'
-      + '&maxResults=' + this.searchPageSize
-      + '&jql=' + encodeURIComponent(
-        'worklogAuthor = currentUser() && worklogDate >= "'
-          + formatDate(jqlStart, 'yyyy-MM-dd', 'en-US') + '" && worklogDate <= "'
-          + formatDate(jqlEnd, 'yyyy-MM-dd', 'en-US') + '"'
+    let url =
+      this.searchUrl +
+      '?fields=components,issuetype,parent,priority,summary,status' +
+      '&maxResults=' +
+      this.searchPageSize +
+      '&jql=' +
+      encodeURIComponent(
+        'worklogAuthor = currentUser() && worklogDate >= "' +
+          formatDate(jqlStart, 'yyyy-MM-dd', 'en-US') +
+          '" && worklogDate <= "' +
+          formatDate(jqlEnd, 'yyyy-MM-dd', 'en-US') +
+          '"'
       );
     if (nextPageToken) {
       url += `&nextPageToken=${encodeURIComponent(nextPageToken)}`;
@@ -47,10 +52,13 @@ export class WorklogApi {
    * Emits a page of an issue's work logs started within the date range, directly as fetched from API.
    */
   getWorklogsForIssue$(issueId: string, dateRange: DateRange, startAt = 0): Observable<WorklogWithPagination> {
-    let url = this.getWorklogsUrl.replace('{issueIdOrKey}', issueId)
+    let url =
+      this.getWorklogsUrl.replace('{issueIdOrKey}', issueId) +
       // startedAfter may be exclusive; one millisecond earlier keeps a worklog started at 00:00 of the first day.
-      + '?startedAfter=' + (dateRange.start.getTime() - 1)
-      + '&startedBefore=' + Calendar.dayAfter(dateRange.end).getTime();
+      '?startedAfter=' +
+      (dateRange.start.getTime() - 1) +
+      '&startedBefore=' +
+      Calendar.dayAfter(dateRange.end).getTime();
     if (startAt > 0) {
       url += `&startAt=${startAt}`;
     }

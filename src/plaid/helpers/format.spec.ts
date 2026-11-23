@@ -1,4 +1,4 @@
-import { Format } from './format';
+import {Format} from './format';
 
 describe('Format', () => {
   describe('timePeriod', () => {
@@ -48,7 +48,7 @@ describe('Format', () => {
   describe('dateRange', () => {
     it('should format a single day range', () => {
       const date = new Date(2024, 0, 15);
-      const result = Format.dateRange({ start: date, end: date });
+      const result = Format.dateRange({start: date, end: date});
       expect(result).toBe('Jan 15, 2024');
     });
 

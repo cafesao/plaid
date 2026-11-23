@@ -71,9 +71,10 @@ export class WorklogPanelComponent implements OnInit, OnDestroy {
     this.panelWidth = 1 / this.worklog._columns;
     this.panelOffsetLeft = this.worklog._column * this.panelWidth;
     if (this.worklog.issue) {
-      this.panelHue = Math.round((Number(this.worklog.issue.fields.parent
-        ? this.worklog.issue.fields.parent.id
-        : this.worklog.issue.id) * 360 / 1.61803)) % 360;
+      this.panelHue =
+        Math.round(
+          (Number(this.worklog.issue.fields.parent ? this.worklog.issue.fields.parent.id : this.worklog.issue.id) * 360) / 1.61803
+        ) % 360;
     }
     this.computeHeightAndOffset();
     this.computeTimeRange();
@@ -114,14 +115,14 @@ export class WorklogPanelComponent implements OnInit, OnDestroy {
     return this._darkMode;
   }
 
-  @ViewChild('panelInner', { static: true })
+  @ViewChild('panelInner', {static: true})
   panelInner: ElementRef<HTMLDivElement>;
 
   constructor(
     private authFacade: AuthFacade,
     private cdr: ChangeDetectorRef,
     private manager: WorklogPanelsManagerService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.jiraURL = this.authFacade.getJiraURL();
@@ -157,7 +158,7 @@ export class WorklogPanelComponent implements OnInit, OnDestroy {
   computeHeightAndOffset(): void {
     this.panelOffsetTop = (this.date.getHours() * 60 + this.date.getMinutes()) * this.pixelsPerMinute;
     this.maxHeight = 1440 * this.pixelsPerMinute - this.panelOffsetTop;
-    this.panelHeight = Math.min(this.worklog.timeSpentSeconds / 60 * this.pixelsPerMinute, this.maxHeight);
+    this.panelHeight = Math.min((this.worklog.timeSpentSeconds / 60) * this.pixelsPerMinute, this.maxHeight);
   }
 
   /**
@@ -210,5 +211,5 @@ export class WorklogPanelComponent implements OnInit, OnDestroy {
       this.deleteConfirmationOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 }

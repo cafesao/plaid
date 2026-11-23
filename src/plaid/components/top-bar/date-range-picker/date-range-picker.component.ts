@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnInit,
-  Output
-} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {DateRange} from '../../../model/date-range';
 import {Format} from '../../../helpers/format';
 import {Calendar} from '../../../helpers/calendar';
@@ -81,8 +72,10 @@ export class DateRangePickerComponent implements OnInit {
 
   readonly weekdays: string[] = Calendar.weekdaysShort;
 
-  constructor(private ref: ElementRef, private cdr: ChangeDetectorRef) {
-  }
+  constructor(
+    private ref: ElementRef,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     // Singleton component, no need to unbind events
@@ -123,7 +116,7 @@ export class DateRangePickerComponent implements OnInit {
       this.calendarOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 
   /**
    * Closes dropdown, if user presses Escape.
@@ -133,7 +126,7 @@ export class DateRangePickerComponent implements OnInit {
       this.calendarOpen = false;
       this.cdr.detectChanges();
     }
-  }
+  };
 
   get calendarOpen(): boolean {
     return this._calendarOpen;

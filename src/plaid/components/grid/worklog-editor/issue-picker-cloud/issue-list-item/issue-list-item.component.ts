@@ -13,7 +13,6 @@ import {Issue} from '../../../../../model/issue';
   styleUrls: ['./issue-list-item.component.scss']
 })
 export class IssueListItemComponent {
-
   @Input()
   issue: Issue;
 
@@ -36,5 +35,4 @@ export class IssueListItemComponent {
       this.issueSelected.next();
     }
   }
-
 }

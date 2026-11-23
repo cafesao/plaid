@@ -14,33 +14,33 @@ export class AuthInterceptor implements HttpInterceptor {
     if (authInfo) {
       const newRequest: HttpRequest<any> = request.clone({
         setHeaders: {Authorization: this.authState.getAuthHeader()},
-        url: request.url.substr(0, 7) !== 'http://' && request.url.substr(0, 8) !== 'https://'
-          ? authInfo.jiraUrl + request.url
-          : request.url
+        url:
+          request.url.substr(0, 7) !== 'http://' && request.url.substr(0, 8) !== 'https://' ? authInfo.jiraUrl + request.url : request.url
       });
-      return next.handle(newRequest).pipe(
-        catchError((error: HttpErrorResponse) => this.handleError(request, next, error))
-      );
+      return next.handle(newRequest).pipe(catchError((error: HttpErrorResponse) => this.handleError(request, next, error)));
     } else {
       return this.handleError(request, next, null);
     }
   }
 
   private handleError(request: HttpRequest<any>, next: HttpHandler, error: HttpErrorResponse): Observable<HttpEvent<any>> {
-    if (error?.status !== 404 || request.method !== 'GET' ||
-      !/\/rest\/api\/2\/issue\/[A-Za-z][A-Za-z0-9_]*-[1-9][0-9]*\?/.test(request.url)) {
+    if (
+      error?.status !== 404 ||
+      request.method !== 'GET' ||
+      !/\/rest\/api\/2\/issue\/[A-Za-z][A-Za-z0-9_]*-[1-9][0-9]*\?/.test(request.url)
+    ) {
       // 404 status when calling GET /rest/api/2/issue/{issueKey} is unfortunately our only way to tell if issue ID is
       // invalid. In any other case we report the error to authState to bring up application error modal.
       this.authState.setError(error);
     }
 
-    if (!error || [0, 401, 403].includes(error.status)) { // If the error is related to lack of connection or authorization:
+    if (!error || [0, 401, 403].includes(error.status)) {
+      // If the error is related to lack of connection or authorization:
       // Retry the request after authentication, except /rest/api/2/myself, because requests to this end point will be
       // retried in the process of authentication.
-      return request.url === '/rest/api/2/myself'
-        ? EMPTY
-        : this.retryAfterAuthenticated(() => this.intercept(request, next));
-    } else { // Otherwise let the error propagate
+      return request.url === '/rest/api/2/myself' ? EMPTY : this.retryAfterAuthenticated(() => this.intercept(request, next));
+    } else {
+      // Otherwise let the error propagate
       return throwError(error);
     }
   }
