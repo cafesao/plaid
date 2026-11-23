@@ -1,7 +1,7 @@
 {
   "name": "plaid",
   "productName": "Plaid",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "author": {
     "name": "Piotr Marczyński",
     "email": "piotmski@gmail.com"
@@ -26,7 +26,7 @@
       "build"
     ],
     "win": {
-      "icon": "build/assets/appicon/icon.ico",
+      "icon": "build/browser/assets/appicon/icon.ico",
       "extraFiles": [
         {
           "from": "src/assets/Plaid.VisualElementsManifest.xml",
@@ -34,14 +34,18 @@
         }
       ],
       "publish": [
-        "github"
+        {
+          "provider": "github",
+          "owner": "cafesao",
+          "repo": "plaid"
+        }
       ]
     },
     "linux": {
-      "icon": "assets/appicon/icon.png"
+      "icon": "build/browser/assets/appicon/icon.png"
     },
     "mac": {
-      "icon": "assets/appicon/icon.icns"
+      "icon": "build/browser/assets/appicon/icon.icns"
     }
   },
   "scripts": {
