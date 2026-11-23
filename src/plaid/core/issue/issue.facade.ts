@@ -15,7 +15,7 @@ export class IssueFacade {
   private suggestions: Issue[];
 
   private static stripSpecialChars(s: string): string {
-    return s.replace(/([+.,;?|*/%^$#@\[\]"'`])/g, ' ').trim();
+    return s.replace(/([+.,;?|*/%^$#@[\]"'`])/g, ' ').trim();
   }
 
   private static canPotentiallyBeIssueKey(maybeKey: string): boolean {
@@ -51,7 +51,7 @@ export class IssueFacade {
       }))),
       tap(() => {
         this.favoriteKeys[this.authFacade.getJiraURL()] =
-          keys.filter((key: string, index: number) => !removedKeysIndexes.includes(index));
+          keys.filter((_key: string, index: number) => !removedKeysIndexes.includes(index));
         this.userPrefsService.setFavoriteKeys(this.favoriteKeys);
       })
     );
@@ -78,13 +78,13 @@ export class IssueFacade {
       if (IssueFacade.canPotentiallyBeIssueKey(query)) {
         return zip(
           this.issueApi.getIssue$(query),
-          this.issueApi.search$('text ~ "' + IssueFacade.stripSpecialChars(query) + '"')
+          this.issueApi.search$(`text ~ "${IssueFacade.stripSpecialChars(query)}"`)
         ).pipe(
           map(([issue, searchResults]) =>
             this.setFavoriteAttribute((issue ? [issue] : []).concat(searchResults.issues)))
         );
       } else {
-        return this.issueApi.search$('text ~ "' + IssueFacade.stripSpecialChars(query) + '"').pipe(
+        return this.issueApi.search$(`text ~ "${IssueFacade.stripSpecialChars(query)}"`).pipe(
           map(res => this.setFavoriteAttribute(res.issues))
         );
       }

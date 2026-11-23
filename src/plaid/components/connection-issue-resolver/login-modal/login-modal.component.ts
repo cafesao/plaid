@@ -30,7 +30,7 @@ export class LoginModalComponent {
       }
       // Add protocol if missing
       if (this.authInfo.jiraUrl.substr(0, 7) !== 'http://' && this.authInfo.jiraUrl.substr(0, 8) !== 'https://') {
-        this.authInfo.jiraUrl = 'https://' + this.authInfo.jiraUrl;
+        this.authInfo.jiraUrl = `https://${this.authInfo.jiraUrl}`;
       }
       // Display http notice if applicable
       this.httpNoticeVisible = this.authInfo.jiraUrl.substr(0, 7) === 'http://';

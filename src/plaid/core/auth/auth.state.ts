@@ -17,7 +17,7 @@ export class AuthState {
   private authInfo = new BehaviorSubject<AuthInfo>(this.getAuthInfo());
 
   static getAuthHeaderKey(authInfo: AuthInfo): string {
-    return 'Basic ' + btoa(authInfo.username + ':' + authInfo.password);
+    return `Basic ${btoa(`${authInfo.username}:${authInfo.password}`)}`;
   }
 
   setAuthInfo(authInfo: AuthInfo): void {

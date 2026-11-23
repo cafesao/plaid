@@ -10,6 +10,6 @@ export interface SearchResults {
   nextPageToken?: string;
   isLast?: boolean;
   warningMessages?: string[];
-  names?: {};
-  schema?: {};
+  names?: Record<string, unknown>;
+  schema?: Record<string, unknown>;
 }

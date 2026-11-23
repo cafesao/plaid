@@ -47,7 +47,7 @@ function createFacade(initialRange: DateRange = WEEK_A) {
 }
 
 function issue(n: number): Issue {
-  return {id: String(n), key: 'T-' + n};
+  return {id: String(n), key: `T-${n}`};
 }
 
 function issues(from: number, count: number): Issue[] {
@@ -112,7 +112,7 @@ describe('WorklogFacade', () => {
   describe('loading a period', () => {
     it('reads every search page until isLast', () => {
       const {api, state, user$} = createFacade();
-      api.getIssuesForWorklogDateRange$.mockImplementation((range: DateRange, token?: string) =>
+      api.getIssuesForWorklogDateRange$.mockImplementation((_range: DateRange, token?: string) =>
         token === 'p2' ? searchPage(issues(101, 5), undefined, true) : searchPage(issues(1, 100), 'p2', false));
       api.getWorklogsForIssue$.mockImplementation(oneWorklogPerIssue);
 
@@ -120,7 +120,9 @@ describe('WorklogFacade', () => {
 
       const calls = api.getIssuesForWorklogDateRange$.mock.calls;
       expect(calls.map(call => call[1])).toEqual([undefined, 'p2']);
-      calls.forEach(call => expect(call[0]).toEqual(WEEK_A));
+      for (const call of calls) {
+        expect(call[0]).toEqual(WEEK_A);
+      }
       expect(currentWorklogs(state)).toHaveLength(105);
     });
 
@@ -182,10 +184,10 @@ describe('WorklogFacade', () => {
 
     it('requests later worklog pages of an issue with the same period', () => {
       const {api, state, user$} = createFacade();
-      const firstPage = Array.from({length: 50}, (_, i) => worklog('a' + i, new Date(2026, 10, 24, 8, i)));
-      const secondPage = Array.from({length: 10}, (_, i) => worklog('b' + i, new Date(2026, 10, 25, 8, i)));
+      const firstPage = Array.from({length: 50}, (_, i) => worklog(`a${i}`, new Date(2026, 10, 24, 8, i)));
+      const secondPage = Array.from({length: 10}, (_, i) => worklog(`b${i}`, new Date(2026, 10, 25, 8, i)));
       api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(7)], undefined, true));
-      api.getWorklogsForIssue$.mockImplementation((id: string, range: DateRange, startAt = 0) =>
+      api.getWorklogsForIssue$.mockImplementation((_id: string, _range: DateRange, startAt = 0) =>
         startAt === 50 ? worklogPage(secondPage, 50, 60) : worklogPage(firstPage, 0, 60));
 
       user$.next(USER);

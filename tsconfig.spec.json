@@ -2,10 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": ["vitest/globals"],
-    "lib": ["es2019", "dom"],
-    "esModuleInterop": true,
-    "emitDecoratorMetadata": true
+    "types": ["vitest/globals"]
   },
   "files": [
     "src/polyfills.ts"

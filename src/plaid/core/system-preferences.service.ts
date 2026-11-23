@@ -7,7 +7,7 @@ import './electron-api';
 export class SystemPreferencesService {
   private darkModeSubject = new BehaviorSubject<boolean>(false);
 
-  constructor(private userPreferencesService: UserPreferencesService) {
+  constructor(userPreferencesService: UserPreferencesService) {
     if (window.electronAPI) {
       window.electronAPI.getNativeThemeShouldUseDarkColors().then((value: boolean) => {
         this.darkModeSubject.next(value);

@@ -55,7 +55,11 @@
     "publish": "electron-builder --publish always",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "lint": "biome lint .",
+    "format": "biome format --write . && prettier --write \"**/*.html\"",
+    "typecheck": "tsc -p tsconfig.spec.json --noEmit",
+    "check": "biome ci --error-on-warnings . && prettier --check \"**/*.html\" && pnpm typecheck && pnpm test && pnpm build"
   },
   "private": false,
   "packageManager": "pnpm@12.23.0",
@@ -81,11 +85,13 @@
     "@angular/cli": "~22.3.0",
     "@angular/compiler-cli": "~22.3.0",
     "@angular/language-service": "~22.3.0",
+    "@biomejs/biome": "^2.6.8",
     "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.6",
     "electron": "^45.4.1",
     "electron-builder": "^26.18.0",
     "jsdom": "^31.0.1",
+    "prettier": "^3.10.1",
     "typescript": "~6.0.3",
     "vitest": "^5.1.1"
   }

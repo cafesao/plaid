@@ -36,6 +36,6 @@ export class Format {
     const minutes: number = Math.floor(numSeconds / 60);
     numSeconds -= minutes * 60;
     const seconds: number = numSeconds;
-    return (hours ? hours + 'h ' : '') + (minutes ? minutes + 'm ' : '') + (seconds ? seconds + 's' : '');
+    return (hours ? `${hours}h ` : '') + (minutes ? `${minutes}m ` : '') + (seconds ? `${seconds}s` : '');
   }
 }

@@ -148,9 +148,9 @@ export class WorklogPanelComponent implements OnInit, OnDestroy {
       startTime.getMonth() === justBeforeEndTime.getMonth() &&
       startTime.getDate() === justBeforeEndTime.getDate()
     ) {
-      this.timeRange = Format.time(startTime) + ' - ' + Format.time(endTime);
+      this.timeRange = `${Format.time(startTime)} - ${Format.time(endTime)}`;
     } else {
-      this.timeRange = 'Since ' + Format.time(startTime) + ' for ' + Format.timePeriod(this.worklog.timeSpentSeconds);
+      this.timeRange = `Since ${Format.time(startTime)} for ${Format.timePeriod(this.worklog.timeSpentSeconds)}`;
     }
   }
 

@@ -14,7 +14,7 @@ export interface FakeJiraOptions {
 
 const JIRA_URL = 'https://jira.test';
 const USER = {
-  self: JIRA_URL + '/rest/api/2/user?accountId=e2e',
+  self: `${JIRA_URL}/rest/api/2/user?accountId=e2e`,
   accountId: 'e2e',
   displayName: 'E2E User',
   emailAddress: 'e2e@jira.test',
@@ -31,9 +31,9 @@ const CORS_HEADERS = {
 function issue(n: number) {
   return {
     id: String(10000 + n),
-    key: 'E2E-' + n,
+    key: `E2E-${n}`,
     fields: {
-      summary: 'Fake issue ' + n,
+      summary: `Fake issue ${n}`,
       status: {name: 'In Progress', statusCategory: {colorName: 'yellow'}},
       components: []
     }
@@ -50,7 +50,7 @@ function worklog(n: number, periodStart: number) {
     issueId: String(10000 + n),
     author: USER,
     updateAuthor: USER,
-    comment: 'E2E worklog ' + n,
+    comment: `E2E worklog ${n}`,
     started: started.toISOString(),
     timeSpentSeconds: 900,
     timeSpent: '15m'
@@ -67,7 +67,7 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
 
   await page.addInitScript(() => {
     localStorage.setItem('AUTH_INFO', JSON.stringify({jiraUrl: 'https://jira.test', username: 'e2e', password: 'e2e'}));
-    localStorage.setItem('AUTH_HEADER', 'Basic ' + btoa('e2e:e2e'));
+    localStorage.setItem('AUTH_HEADER', `Basic ${btoa('e2e:e2e')}`);
     (window as any).electronAPI = {
       getNativeThemeShouldUseDarkColors: () => Promise.resolve(false),
       setNativeThemeSource: () => Promise.resolve(),
@@ -79,7 +79,7 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
   const respond = (route: Route, body: unknown) =>
     route.fulfill({status: 200, contentType: 'application/json', headers: CORS_HEADERS, body: JSON.stringify(body)});
 
-  await page.route(JIRA_URL + '/**', async (route: Route) => {
+  await page.route(`${JIRA_URL}/**`, async (route: Route) => {
     const request = route.request();
     if (request.method() === 'OPTIONS') {
       await route.fulfill({status: 204, headers: CORS_HEADERS});
@@ -125,7 +125,9 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
     pauseResponses: () => paused = true,
     resumeResponses: () => {
       paused = false;
-      waiting.forEach(resolve => resolve());
+      waiting.forEach(resolve => {
+        resolve();
+      });
       waiting = [];
     }
   };

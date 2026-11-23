@@ -23,7 +23,7 @@ export class WorklogCache {
   private entries = new Map<string, CacheEntry>();
 
   private static key(range: DateRange): string {
-    return range.start.getTime() + '_' + range.end.getTime();
+    return `${range.start.getTime()}_${range.end.getTime()}`;
   }
 
   private static startOf(worklog: Worklog): number {
@@ -74,7 +74,9 @@ export class WorklogCache {
   }
 
   remove(worklogId: string): void {
-    this.entries.forEach(entry => entry.worklogs = entry.worklogs.filter(wl => wl.id !== worklogId));
+    this.entries.forEach(entry => {
+      entry.worklogs = entry.worklogs.filter(wl => wl.id !== worklogId);
+    });
   }
 
   clear(): void {

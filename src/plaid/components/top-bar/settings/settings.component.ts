@@ -135,7 +135,7 @@ export class SettingsComponent {
     }
     const hours: number = Math.floor(minutesSinceMidnight / 60);
     const minutes: number = minutesSinceMidnight % 60;
-    return (hours <= 9 ? '0' : '') + hours.toString() + ':' + (minutes <= 9 ? '0' : '') + minutes.toString();
+    return `${hours <= 9 ? '0' : ''}${hours}:${minutes <= 9 ? '0' : ''}${minutes}`;
   }
 
   timeStringToMinutes(timeString: string): number {

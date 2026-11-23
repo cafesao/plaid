@@ -38,7 +38,7 @@ export class WorklogApi {
           + formatDate(jqlEnd, 'yyyy-MM-dd', 'en-US') + '"'
       );
     if (nextPageToken) {
-      url += '&nextPageToken=' + encodeURIComponent(nextPageToken);
+      url += `&nextPageToken=${encodeURIComponent(nextPageToken)}`;
     }
     return this.http.get<SearchResults>(url);
   }
@@ -52,7 +52,7 @@ export class WorklogApi {
       + '?startedAfter=' + (dateRange.start.getTime() - 1)
       + '&startedBefore=' + Calendar.dayAfter(dateRange.end).getTime();
     if (startAt > 0) {
-      url += '&startAt=' + startAt;
+      url += `&startAt=${startAt}`;
     }
     return this.http.get<WorklogWithPagination>(url);
   }

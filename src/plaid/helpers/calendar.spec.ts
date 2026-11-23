@@ -19,7 +19,9 @@ describe('Calendar', () => {
     });
 
     it('should have 3-letter abbreviations', () => {
-      Calendar.monthsShort.forEach(m => expect(m).toHaveLength(3));
+      for (const m of Calendar.monthsShort) {
+        expect(m).toHaveLength(3);
+      }
     });
   });
 
@@ -43,7 +45,9 @@ describe('Calendar', () => {
     it('should return weeks of 7 days each', () => {
       const month = new Date(2024, 0, 1); // January 2024
       const weeks = Calendar.getDaysOfMonth(month);
-      weeks.forEach(week => expect(week).toHaveLength(7));
+      for (const week of weeks) {
+        expect(week).toHaveLength(7);
+      }
     });
 
     it('should contain all days of the month', () => {

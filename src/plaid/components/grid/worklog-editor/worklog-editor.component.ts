@@ -98,7 +98,7 @@ export class WorklogEditorComponent implements OnInit {
   cancelEdit = new EventEmitter<void>();
 
   @Input()
-  gridElement: HTMLDivElement;
+  gridElement: HTMLElement;
 
   /**
    * Whether keyboard navigation should be disabled due to modal or a cloud being open.
@@ -578,7 +578,7 @@ export class WorklogEditorComponent implements OnInit {
       ? issue.fields.parent.id
       : issue.id) * 360 / 1.61803)) % 360 : 0;
     this.panelSaturation = issue ? 50 : 0;
-    this.issueString = issue ? issue.key + ' - ' + issue.fields.summary : defaultIssueString;
+    this.issueString = issue ? `${issue.key} - ${issue.fields.summary}` : defaultIssueString;
   }
 
   close(): void {

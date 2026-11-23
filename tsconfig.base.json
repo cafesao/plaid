@@ -14,13 +14,13 @@
     "importHelpers": true,
     "target": "es2022",
     "lib": [
-      "es2018",
+      "es2022",
       "dom"
     ]
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true,
-    "strictTemplates": false
+    "strictTemplates": true
   }
 }

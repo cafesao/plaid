@@ -325,7 +325,7 @@ export class GridComponent implements OnInit, AfterViewInit {
     this.updateAddHints();
   }
 
-  worklogPanelTrackByFn(index: number, item: Worklog): string {
+  worklogPanelTrackByFn(_index: number, item: Worklog): string {
     return JSON.stringify(item);
   }
 
@@ -372,7 +372,7 @@ export class GridComponent implements OnInit, AfterViewInit {
         gapEnd.setHours(Math.floor(this.workingHoursEndMinutes / 60), this.workingHoursEndMinutes % 60);
       }
       const fivemin = 300000; // ms
-      const now = new Date(Math.round(new Date().getTime() / fivemin) * fivemin);
+      const now = new Date(Math.round(Date.now()/ fivemin) * fivemin);
       if (gapEnd > now) {
         gapEnd = new Date(gapEnd);
         gapEnd.setHours(now.getHours(), now.getMinutes());

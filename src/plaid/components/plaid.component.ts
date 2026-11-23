@@ -38,8 +38,7 @@ export class PlaidComponent implements OnInit {
   refreshIntervalMinutes: number;
   theme: Theme;
 
-  constructor(
-    private systemPreferencesService: SystemPreferencesService, // Injected service early to run its constructor
+  constructor(_systemPreferencesService: SystemPreferencesService, // Injected service early to run its constructor
     private authFacade: AuthFacade,
     private worklogFacade: WorklogFacade,
     private appStateService: AppStateService,

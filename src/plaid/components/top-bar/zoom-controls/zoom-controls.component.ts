@@ -83,7 +83,7 @@ export class ZoomControlsComponent implements OnInit {
   emitChange(): void {
     this.pixelsPerMinuteExponentChange.emit(this.pixelsPerMinuteExponent);
     // Emitted value has reduced binary and decimal precision not to brake layout.
-    this.pixelsPerMinuteChange.emit(Math.round(Math.pow(2, this.pixelsPerMinuteExponent) * 128) / 128);
+    this.pixelsPerMinuteChange.emit(Math.round(2 ** this.pixelsPerMinuteExponent * 128) / 128);
   }
 
   get isAbleToZoomIn(): boolean {

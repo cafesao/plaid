@@ -81,9 +81,9 @@ export class AuthStatusComponent {
    * chosen, under assumption, that they are ordered from smallest to largest.
    */
   get currentUserAvatarUrl(): string {
-    if (!this.user || !this.user.avatarUrls || Object.keys(this.user.avatarUrls).length === 0) {
+    if (!this.user?.avatarUrls || Object.keys(this.user.avatarUrls).length === 0) {
       return null;
-    } else if (this.user.avatarUrls.hasOwnProperty('24x24')) {
+    } else if (Object.hasOwn(this.user.avatarUrls, '24x24')) {
       return this.user.avatarUrls['24x24'];
     } else {
       const sizes: string[] = Object.keys(this.user.avatarUrls);

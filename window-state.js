@@ -1,9 +1,9 @@
 const {app, screen} = require('electron');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 module.exports = {
-  getNewWindowRect: function(options) {
+  getNewWindowRect: (options) => {
     // Getting window state is far from critical, hence the whole function body can be wrapped in a 'try' block.
     try {
       let rect;
@@ -57,7 +57,7 @@ module.exports = {
     }
   },
 
-  getNewWindowMaximized: function(isFirstWindow) {
+  getNewWindowMaximized: (isFirstWindow) => {
     // If multiple windows are opened at once, state is only restored for first window. Consecutive windows get default
     // are created with default size and position.
     if (isFirstWindow) {
@@ -71,7 +71,7 @@ module.exports = {
     }
   },
 
-  saveWindowState: function(rect, maximized) {
+  saveWindowState: (rect, maximized) => {
     // Saving window state is far from critical, if it fails, it does not matter.
     try {
       fs.writeFileSync(path.join(app.getPath('userData'), 'window-state.json'), JSON.stringify({
