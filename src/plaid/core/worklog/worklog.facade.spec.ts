@@ -1,3 +1,4 @@
+import type {Mock} from 'vitest';
 import {BehaviorSubject, Observable, of, Subject} from 'rxjs';
 import {WORKLOG_REQUEST_CONCURRENCY, WorklogFacade} from './worklog.facade';
 import {WorklogState} from './worklog.state';
@@ -18,20 +19,20 @@ const OTHER_USER: User = {self: 'https://jira.test/rest/api/2/user?accountId=u2'
 const WEEK_A: DateRange = {start: new Date(2026, 10, 23), end: new Date(2026, 10, 29)};
 const WEEK_B: DateRange = {start: new Date(2026, 10, 30), end: new Date(2026, 11, 6)};
 
-type ApiMock = { [K in keyof WorklogApi]: jest.Mock };
+type ApiMock = { [K in keyof WorklogApi]: Mock };
 
 function createFacade(initialRange: DateRange = WEEK_A) {
   const api = {
-    getIssuesForWorklogDateRange$: jest.fn(),
-    getWorklogsForIssue$: jest.fn(),
-    addWorklog$: jest.fn(),
-    updateWorklog$: jest.fn(),
-    deleteWorklog$: jest.fn()
+    getIssuesForWorklogDateRange$: vi.fn(),
+    getWorklogsForIssue$: vi.fn(),
+    addWorklog$: vi.fn(),
+    updateWorklog$: vi.fn(),
+    deleteWorklog$: vi.fn()
   } as unknown as ApiMock;
   const state = new WorklogState();
   const user$ = new BehaviorSubject<User>(null);
   const range$ = new BehaviorSubject<DateRange>(initialRange);
-  const authFacade = {getAuthenticatedUser$: () => user$.asObservable(), reconnect: jest.fn()};
+  const authFacade = {getAuthenticatedUser$: () => user$.asObservable(), reconnect: vi.fn()};
   const appStateService = {getVisibleDateRange$: () => range$.asObservable()};
   const userPreferencesService = {getRefreshIntervalMinutes$: () => of(0)};
   const facade = new WorklogFacade(

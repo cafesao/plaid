@@ -16,7 +16,9 @@
             "outputPath": "build/",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["src/polyfills.ts"],
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/assets/appicon",
@@ -72,6 +74,18 @@
           "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "plaid:build"
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "plaid:build",
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "polyfills": [
+              "zone.js"
+            ],
+            "providersFile": "src/test-providers.ts"
           }
         }
       }

@@ -2,7 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": ["jest"],
+    "types": ["vitest/globals"],
     "lib": ["es2019", "dom"],
     "esModuleInterop": true,
     "emitDecoratorMetadata": true

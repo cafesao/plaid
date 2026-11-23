@@ -1,17 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {UserPreferencesService} from './user-preferences.service';
-
-declare global {
-  interface Window {
-    electronAPI?: {
-      getNativeThemeShouldUseDarkColors: () => Promise<boolean>;
-      setNativeThemeSource: (source: string) => Promise<void>;
-      onNativeThemeUpdated: (callback: (shouldUseDarkColors: boolean) => void) => void;
-      openExternal: (url: string) => Promise<void>;
-    };
-  }
-}
+import './electron-api';
 
 @Injectable({ providedIn: 'root' })
 export class SystemPreferencesService {

@@ -16,7 +16,7 @@ describe('RateLimitRetryInterceptor', () => {
   }
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     localStorage.setItem('AUTH_INFO', JSON.stringify({jiraUrl: 'https://jira.test', username: 'u', password: 'p'}));
     localStorage.setItem('AUTH_HEADER', 'Basic dTpw');
     TestBed.configureTestingModule({
@@ -35,7 +35,7 @@ describe('RateLimitRetryInterceptor', () => {
 
   afterEach(() => {
     controller.verify();
-    jest.useRealTimers();
+    vi.useRealTimers();
     localStorage.clear();
   });
 
@@ -44,9 +44,9 @@ describe('RateLimitRetryInterceptor', () => {
     http.get('/rest/api/2/issue/1/worklog').subscribe(response => value = response);
 
     controller.expectOne(url).flush(null, tooManyRequests('1'));
-    jest.advanceTimersByTime(999);
+    vi.advanceTimersByTime(999);
     controller.expectNone(url);
-    jest.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1);
     controller.expectOne(url).flush({ok: true});
 
     expect(value).toEqual({ok: true});
@@ -57,9 +57,9 @@ describe('RateLimitRetryInterceptor', () => {
     http.get('/rest/api/2/issue/1/worklog').subscribe(response => value = response);
 
     controller.expectOne(url).flush(null, tooManyRequests());
-    jest.advanceTimersByTime(RATE_LIMIT_DEFAULT_DELAY_MS - 1);
+    vi.advanceTimersByTime(RATE_LIMIT_DEFAULT_DELAY_MS - 1);
     controller.expectNone(url);
-    jest.advanceTimersByTime(1);
+    vi.advanceTimersByTime(1);
     controller.expectOne(url).flush({ok: true});
 
     expect(RATE_LIMIT_DEFAULT_DELAY_MS).toBe(2000);
@@ -74,7 +74,7 @@ describe('RateLimitRetryInterceptor', () => {
     for (let attempt = 0; attempt <= RATE_LIMIT_MAX_RETRIES; attempt++) {
       controller.expectOne(url).flush(null, tooManyRequests('1'));
       requests++;
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     }
     controller.expectNone(url);
 
@@ -88,18 +88,18 @@ describe('RateLimitRetryInterceptor', () => {
     http.get('/rest/api/2/issue/1/worklog').subscribe({error: e => error = e});
 
     controller.expectOne(url).flush(null, {status: 500, statusText: 'Server Error'});
-    jest.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(10000);
     controller.expectNone(url);
 
     expect(error.status).toBe(500);
   });
 
   it('does not report an error to AuthState while retries succeed', () => {
-    const setError = jest.spyOn(authState, 'setError');
+    const setError = vi.spyOn(authState, 'setError');
     http.get('/rest/api/2/issue/1/worklog').subscribe();
 
     controller.expectOne(url).flush(null, tooManyRequests('1'));
-    jest.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(1000);
     controller.expectOne(url).flush({ok: true});
 
     expect(setError).not.toHaveBeenCalled();

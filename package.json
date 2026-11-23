@@ -53,8 +53,8 @@
     "zip": "cd dist/ && rm -f plaid-windows-portable.zip && zip -r plaid-windows-portable.zip win-unpacked/ && cd ..",
     "package": "electron-builder",
     "publish": "electron-builder --publish always",
-    "test": "jest --config jest.config.js",
-    "test:watch": "jest --config jest.config.js --watch",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test",
     "test:e2e": "playwright test"
   },
   "private": false,
@@ -82,13 +82,11 @@
     "@angular/compiler-cli": "~22.3.0",
     "@angular/language-service": "~22.3.0",
     "@playwright/test": "^1.65.1",
-    "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
     "electron": "^45.4.1",
     "electron-builder": "^26.18.0",
-    "jest": "^30.5.2",
-    "jest-environment-jsdom": "^30.5.2",
-    "jest-preset-angular": "^17.0.3",
-    "typescript": "~6.0.3"
+    "jsdom": "^31.0.1",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.1"
   }
 }
