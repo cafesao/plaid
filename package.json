@@ -26,7 +26,7 @@
       "build"
     ],
     "win": {
-      "icon": "build/assets/appicon/icon.ico",
+      "icon": "build/browser/assets/appicon/icon.ico",
       "extraFiles": [
         {
           "from": "src/assets/Plaid.VisualElementsManifest.xml",
@@ -42,10 +42,10 @@
       ]
     },
     "linux": {
-      "icon": "assets/appicon/icon.png"
+      "icon": "build/browser/assets/appicon/icon.png"
     },
     "mac": {
-      "icon": "assets/appicon/icon.icns"
+      "icon": "build/browser/assets/appicon/icon.icns"
     }
   },
   "scripts": {
