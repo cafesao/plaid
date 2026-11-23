@@ -14,7 +14,7 @@ export class IssueApi {
 
   getIssue$(issueIdOrKey: string): Observable<Issue> {
     return this.http
-      .get<Issue>(this.getIssueUrl.replace('{issueIdOrKey}', issueIdOrKey) + '?fields=components,issuetype,parent,priority,summary,status')
+      .get<Issue>(`${this.getIssueUrl.replace('{issueIdOrKey}', issueIdOrKey)}?fields=components,issuetype,parent,priority,summary,status`)
       .pipe(catchError(() => of(null)));
   }
 
