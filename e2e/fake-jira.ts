@@ -10,6 +10,8 @@ export interface FakeJiraOptions {
   /** Issues E2E-1..E2E-N, each with one worklog of the user in the requested period. */
   issueCount: number;
   responseDelayMs?: number;
+  /** Issues E2E-1..E2E-N returned by searches that are not the worklog search (issue picker suggestions). Default 0. */
+  suggestedIssueCount?: number;
 }
 
 const JIRA_URL = 'https://jira.test';
@@ -64,6 +66,7 @@ function worklog(n: number, periodStart: number) {
 export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promise<FakeJira> {
   let paused = false;
   let waiting: (() => void)[] = [];
+  let addedWorklogs = 0;
 
   await page.addInitScript(() => {
     localStorage.setItem('AUTH_INFO', JSON.stringify({jiraUrl: 'https://jira.test', username: 'e2e', password: 'e2e'}));
@@ -99,7 +102,9 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
     } else if (url.pathname === '/rest/api/3/search/jql') {
       const jql = url.searchParams.get('jql') || '';
       if (!jql.includes('worklogDate')) {
-        await respond(route, {issues: [], isLast: true}); // issue picker suggestions
+        // issue picker suggestions and searches
+        const suggested = Array.from({length: opts.suggestedIssueCount ?? 0}, (_, i) => issue(i + 1));
+        await respond(route, {issues: suggested, isLast: true});
         return;
       }
       const pageSize = Number(url.searchParams.get('maxResults') || 50);
@@ -112,6 +117,18 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
       }
       const isLast = last >= opts.issueCount;
       await respond(route, isLast ? {issues, isLast} : {issues, isLast, nextPageToken: String(pageIndex + 1)});
+    } else if (worklogPath && request.method() === 'POST') {
+      const body = request.postDataJSON();
+      addedWorklogs++;
+      await respond(route, {
+        id: String(30000 + addedWorklogs),
+        issueId: worklogPath[1],
+        author: USER,
+        updateAuthor: USER,
+        started: body.started,
+        timeSpentSeconds: body.timeSpentSeconds,
+        comment: body.comment
+      });
     } else if (worklogPath) {
       const n = Number(worklogPath[1]) - 10000;
       const worklogs = [worklog(n, Number(url.searchParams.get('startedAfter')))];

@@ -44,7 +44,8 @@ Plaid lets you get a better overview of your Jira worklog. Add, edit and remove 
   
   Hold your mouse over a gap to reveal a **+** button. Click it to invoke worklog entry editor in adding mode filling the gap.
   
-  Click "Add" to submit the new entry to Jira.
+  Click "Add" to submit the new entry to Jira. If you close the editor without adding (by clicking outside it or pressing
+  Esc), the issue you picked and the comment you wrote are kept for the next new entry; click "Cancel" to discard them.
 
 - Deleting entries
 

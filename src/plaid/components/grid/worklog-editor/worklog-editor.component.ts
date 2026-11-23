@@ -20,6 +20,7 @@ import {DatePickerCloudComponent} from './date-picker-cloud/date-picker-cloud.co
 import {Issue} from '../../../model/issue';
 import {IssuePickerCloudComponent} from './issue-picker-cloud/issue-picker-cloud.component';
 import {Subject} from 'rxjs';
+import {WorklogDraftService} from './worklog-draft.service';
 
 /**
  * Smart component, presenting edited worklog, handling all its interactions and updating worklog on the server
@@ -69,6 +70,8 @@ export class WorklogEditorComponent implements OnInit {
   _visibleDaysEnd: number;
   updateFavoriteIssuesAndSuggestionsAndEmitSuggestion = new Subject<void>();
   adding: boolean;
+  /** Whether the user picked the issue (or it came from their draft), so an automatic suggestion must not replace it. */
+  issuePickedByHand = false;
 
   @ViewChild('panel')
   panel: ElementRef<HTMLDivElement>;
@@ -162,6 +165,10 @@ export class WorklogEditorComponent implements OnInit {
       this.updatePanelHueSaturationAndIssueString(worklog.issue);
       this.dateString = Format.date(this.start);
       this.commentString = worklog.comment;
+      this.issuePickedByHand = false;
+      if (this.adding) {
+        this.restoreDraft();
+      }
       if (this.editedPanelInRange) {
         this.computeSizeAndOffset();
       }
@@ -212,7 +219,8 @@ export class WorklogEditorComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private authFacade: AuthFacade,
     private worklogFacade: WorklogFacade,
-    private appStateService: AppStateService
+    private appStateService: AppStateService,
+    private worklogDraft: WorklogDraftService
   ) {}
 
   /**
@@ -557,7 +565,10 @@ export class WorklogEditorComponent implements OnInit {
     this.saving = true;
     if (this.adding) {
       this.worklogFacade.addWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
-        next: () => this.close(),
+        next: () => {
+          this.worklogDraft.clear();
+          this.hide();
+        },
         complete: () => {
           this.saving = false;
           this.cdr.detectChanges();
@@ -579,14 +590,45 @@ export class WorklogEditorComponent implements OnInit {
   }
 
   /**
-   * Handles issue selection action from issue picker.
+   * Handles the issue the user picked in the issue picker.
    */
   selectIssue(issue: Issue): void {
+    this.setIssue(issue);
+    this.issuePickedByHand = true;
+  }
+
+  /**
+   * Handles the automatic suggestion from the issue picker: it fills the issue of a new worklog only while the user has
+   * not picked one (by hand or through their draft).
+   */
+  applySuggestedIssue(issue: Issue): void {
+    if (this.worklog && this.adding && !this.issuePickedByHand) {
+      this.setIssue(issue);
+    }
+  }
+
+  private setIssue(issue: Issue): void {
     if (this.worklog) {
       this.worklog.issue = issue;
       this.worklog.issueId = issue ? issue.id : null;
     }
     this.updatePanelHueSaturationAndIssueString(issue, '');
+  }
+
+  /**
+   * Fills a new worklog with the issue picked by hand and the comment the user left when closing the editor.
+   */
+  private restoreDraft(): void {
+    const draft = this.worklogDraft.get();
+    if (!draft) {
+      return;
+    }
+    if (draft.issue) {
+      this.selectIssue(draft.issue);
+    }
+    if (draft.comment) {
+      this.commentString = draft.comment;
+    }
   }
 
   updatePanelHueSaturationAndIssueString(issue?: Issue, defaultIssueString: string = '···'): void {
@@ -595,7 +637,28 @@ export class WorklogEditorComponent implements OnInit {
     this.issueString = issue ? `${issue.key} - ${issue.fields.summary}` : defaultIssueString;
   }
 
+  /**
+   * Closes the editor without saving (clicking outside, Escape, leaving the visible days). A new worklog's issue picked
+   * by hand and comment are kept as a draft for the next one.
+   */
   close(): void {
+    if (this.worklog && this.adding) {
+      this.worklogDraft.keep({issue: this.issuePickedByHand ? this.worklog.issue : null, comment: this.commentString});
+    }
+    this.hide();
+  }
+
+  /**
+   * Closes the editor through the Cancel button: a new worklog's draft is discarded.
+   */
+  cancel(): void {
+    if (this.worklog && this.adding) {
+      this.worklogDraft.clear();
+    }
+    this.hide();
+  }
+
+  private hide(): void {
     this.cancelEdit.emit();
     this.worklog = null;
   }
