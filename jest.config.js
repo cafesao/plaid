@@ -6,9 +6,13 @@ module.exports = {
   moduleNameMapper: {
     '^.*/core/electron\\.service$': '<rootDir>/src/__mocks__/electron.service.ts'
   },
-  globals: {
-    'ts-jest': {
-      tsconfig: '<rootDir>/tsconfig.spec.json'
-    }
+  transform: {
+    '^.+\\.(ts|js|mjs|html|svg)$': [
+      'jest-preset-angular',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        stringifyContentPathRegex: '\\.(html|svg)$'
+      }
+    ]
   }
 };
