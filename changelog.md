@@ -2,6 +2,13 @@
 
 ## 1.1
 
+**1.1.1**
+
+- when Jira rejects a new or edited entry, the editor no longer stays stuck in "saving": what you entered is kept, so
+  you can try again or cancel
+- Enter no longer sends an entry without an issue or sends the same entry twice; Esc no longer closes the editor while
+  it is saving
+
 **1.1.0** (fork cafesao/plaid)
 
 - closing the editor of a new entry without adding it (clicking outside or Esc) keeps the issue and comment for the next

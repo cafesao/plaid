@@ -12,6 +12,8 @@ export interface FakeJiraOptions {
   responseDelayMs?: number;
   /** Issues E2E-1..E2E-N returned by searches that are not the worklog search (issue picker suggestions). Default 0. */
   suggestedIssueCount?: number;
+  /** How many of the first worklog POSTs are answered with HTTP 500 before the following ones succeed. Default 0. */
+  failWorklogPosts?: number;
 }
 
 const JIRA_URL = 'https://jira.test';
@@ -67,6 +69,7 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
   let paused = false;
   let waiting: (() => void)[] = [];
   let addedWorklogs = 0;
+  let rejectedPosts = 0;
 
   await page.addInitScript(() => {
     localStorage.setItem('AUTH_INFO', JSON.stringify({jiraUrl: 'https://jira.test', username: 'e2e', password: 'e2e'}));
@@ -117,6 +120,14 @@ export async function installFakeJira(page: Page, opts: FakeJiraOptions): Promis
       }
       const isLast = last >= opts.issueCount;
       await respond(route, isLast ? {issues, isLast} : {issues, isLast, nextPageToken: String(pageIndex + 1)});
+    } else if (worklogPath && request.method() === 'POST' && rejectedPosts < (opts.failWorklogPosts ?? 0)) {
+      rejectedPosts++;
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        headers: CORS_HEADERS,
+        body: JSON.stringify({errorMessages: ['Internal server error']})
+      });
     } else if (worklogPath && request.method() === 'POST') {
       const body = request.postDataJSON();
       addedWorklogs++;
