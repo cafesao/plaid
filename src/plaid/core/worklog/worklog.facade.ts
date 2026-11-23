@@ -7,13 +7,14 @@ import {WorklogState} from './worklog.state';
 import {WorklogApi} from './worklog.api';
 import {AuthFacade} from '../auth/auth.facade';
 import {AppStateService} from '../app-state.service';
-import {expand, map, mergeAll, mergeMap, scan, takeLast, tap} from 'rxjs/operators';
+import {expand, map, mergeAll, mergeMap, scan, tap} from 'rxjs/operators';
 import {Calendar} from '../../helpers/calendar';
 import {UserPreferencesService} from '../user-preferences.service';
 import Timeout = NodeJS.Timeout;
 import {Issue} from '../../model/issue';
 import {WorklogWithPagination} from '../../model/worklog-with-pagination';
 import {SearchResults} from '../../model/search-results';
+import {WorklogCache} from './worklog-cache';
 
 /** Maximum number of issues whose work logs are fetched at the same time. */
 export const WORKLOG_REQUEST_CONCURRENCY = 4;
@@ -24,6 +25,8 @@ export const WORKLOG_REQUEST_CONCURRENCY = 4;
 @Injectable({ providedIn: 'root' })
 export class WorklogFacade {
   private fetchWorklogsSubscription: Subscription;
+  /** Counts successful add/update/delete calls, so a background refresh started before one of them is discarded. */
+  private mutationCount = 0;
   visibleDateRange: DateRange;
   currentUser: User;
   refreshIntervalTimeoutMinutes: number;
@@ -34,7 +37,8 @@ export class WorklogFacade {
     private worklogApi: WorklogApi,
     private authFacade: AuthFacade,
     private appStateService: AppStateService,
-    private userPreferencesService: UserPreferencesService
+    private userPreferencesService: UserPreferencesService,
+    private worklogCache: WorklogCache
   ) {
     // Fetch work logs after visible date range change
     this.appStateService.getVisibleDateRange$().subscribe(dateRange => {
@@ -44,7 +48,15 @@ export class WorklogFacade {
         // Fetching worklogs is omitted when the new date range is a sub-interval of the old date range.
         if (oldVisibleDateRange.start.getTime() > dateRange.start.getTime() ||
           oldVisibleDateRange.end.getTime() < dateRange.end.getTime()) {
-          this.fetchWorklogsVerbose();
+          const cached: Worklog[] = this.worklogCache.get(this.visibleDateRange);
+          if (cached) {
+            // Show the period seen before at once, then check it against Jira in the background.
+            this.worklogState.setWorklogs(cached);
+            this.worklogState.setFetching(false);
+            this.fetchWorklogsQuiet();
+          } else {
+            this.fetchWorklogsVerbose();
+          }
         }
       } else {
         // When application launches, authentication data may be present, but the application is in a state of lack of
@@ -56,6 +68,8 @@ export class WorklogFacade {
     // Fetch work logs after user change
     this.authFacade.getAuthenticatedUser$().subscribe(user => {
       this.currentUser = user;
+      // Login, logout and reconnection may mean another account or another Jira: never show its cached work logs.
+      this.worklogCache.clear();
       if (user) {
         this.fetchWorklogsVerbose();
       } else {
@@ -117,14 +131,8 @@ export class WorklogFacade {
   }
 
   /**
-   * Emits the complete list of work logs.
-   */
-  private getWorklogsForDateRangeQuiet$(dateRange: DateRange, user: User): Observable<Worklog[]> {
-    return this.getWorklogsForDateRangeVerbose$(dateRange, user).pipe(takeLast<Worklog[]>(1));
-  }
-
-  /**
    * Refreshes work logs by emitting the updated list on every stage of the refreshing process and emits 'fetching'.
+   * Once complete, the result is cached; a fetch cut short (e.g. by a period change) caches nothing.
    */
   fetchWorklogsVerbose(): void {
     this.worklogState.setFetching(true);
@@ -133,27 +141,46 @@ export class WorklogFacade {
       this.fetchWorklogsSubscription.unsubscribe();
     }
 
-    this.fetchWorklogsSubscription = this.getWorklogsForDateRangeVerbose$(this.visibleDateRange, this.currentUser)
+    const dateRange: DateRange = Calendar.copyDateRange(this.visibleDateRange);
+    let worklogs: Worklog[] = [];
+    this.fetchWorklogsSubscription = this.getWorklogsForDateRangeVerbose$(dateRange, this.currentUser)
       .subscribe({
-        next: (worklogs: Worklog[]) => this.worklogState.setWorklogs(worklogs),
-        complete: () => this.worklogState.setFetching(false)
+        next: (fetched: Worklog[]) => {
+          worklogs = fetched;
+          this.worklogState.setWorklogs(fetched);
+        },
+        complete: () => {
+          this.worklogState.setWorklogs(worklogs);
+          this.worklogState.setFetching(false);
+          this.worklogCache.set(dateRange, worklogs);
+        }
       });
 
     this.reschedulePeriodicRefreshing();
   }
 
   /**
-   * Refreshes work logs by emitting the updated list only once and doesn't emit 'fetching' afterwards.
+   * Refreshes work logs by emitting the updated list only once and doesn't emit 'fetching' afterwards. The result is
+   * discarded if a work log was added, updated or deleted meanwhile, so it never overwrites the user's edit.
    */
   fetchWorklogsQuiet(): void {
     if (this.fetchWorklogsSubscription) {
       this.fetchWorklogsSubscription.unsubscribe();
     }
 
-    this.fetchWorklogsSubscription = this.getWorklogsForDateRangeQuiet$(this.visibleDateRange, this.currentUser)
-      .subscribe((worklogs: Worklog[]) => {
-        this.worklogState.setWorklogs(worklogs);
-        this.worklogState.setFetching(false);
+    const dateRange: DateRange = Calendar.copyDateRange(this.visibleDateRange);
+    const mutationCountAtStart: number = this.mutationCount;
+    let worklogs: Worklog[] = [];
+    this.fetchWorklogsSubscription = this.getWorklogsForDateRangeVerbose$(dateRange, this.currentUser)
+      .subscribe({
+        next: (fetched: Worklog[]) => worklogs = fetched,
+        complete: () => {
+          this.worklogState.setFetching(false);
+          if (this.mutationCount === mutationCountAtStart) {
+            this.worklogState.setWorklogs(worklogs);
+            this.worklogCache.set(dateRange, worklogs);
+          }
+        }
       });
   }
 
@@ -170,7 +197,7 @@ export class WorklogFacade {
    */
   addWorklog$(worklog: Worklog, started: Date, timeSpentSeconds: number, comment: string): Observable<Worklog> {
     return this.worklogApi.addWorklog$(worklog.issueId, started, timeSpentSeconds, comment).pipe(
-      tap((added: Worklog) => this.worklogState.addOrUpdateWorklog({...worklog, ...added}))
+      tap((added: Worklog) => this.applyAddedOrUpdated({...worklog, ...added}))
     );
   }
 
@@ -179,8 +206,14 @@ export class WorklogFacade {
    */
   updateWorklog$(worklog: Worklog, started: Date, timeSpentSeconds: number, comment: string): Observable<Worklog> {
     return this.worklogApi.updateWorklog$(worklog.issueId, worklog.id, started, timeSpentSeconds, comment).pipe(
-      tap((updated: Worklog) => this.worklogState.addOrUpdateWorklog({...worklog, ...updated}))
+      tap((updated: Worklog) => this.applyAddedOrUpdated({...worklog, ...updated}))
     );
+  }
+
+  private applyAddedOrUpdated(worklog: Worklog): void {
+    this.mutationCount++;
+    this.worklogState.addOrUpdateWorklog(worklog);
+    this.worklogCache.upsert(worklog);
   }
 
   reschedulePeriodicRefreshing(): void {
@@ -197,7 +230,9 @@ export class WorklogFacade {
 
   deleteWorklog(worklog: Worklog): void {
     this.worklogApi.deleteWorklog$(worklog.issueId, worklog.id).subscribe(() => {
+      this.mutationCount++;
       this.worklogState.deleteWorklog(worklog.id);
+      this.worklogCache.remove(worklog.id);
     });
   }
 }

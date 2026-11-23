@@ -11,10 +11,12 @@ import {Issue} from '../../model/issue';
 import {Worklog} from '../../model/worklog';
 import {SearchResults} from '../../model/search-results';
 import {WorklogWithPagination} from '../../model/worklog-with-pagination';
+import {WorklogCache} from './worklog-cache';
 
 const USER: User = {self: 'https://jira.test/rest/api/2/user?accountId=u1'};
 const OTHER_USER: User = {self: 'https://jira.test/rest/api/2/user?accountId=u2'};
 const WEEK_A: DateRange = {start: new Date(2026, 10, 23), end: new Date(2026, 10, 29)};
+const WEEK_B: DateRange = {start: new Date(2026, 10, 30), end: new Date(2026, 11, 6)};
 
 type ApiMock = { [K in keyof WorklogApi]: jest.Mock };
 
@@ -37,7 +39,8 @@ function createFacade(initialRange: DateRange = WEEK_A) {
     api as unknown as WorklogApi,
     authFacade as unknown as AuthFacade,
     appStateService as unknown as AppStateService,
-    userPreferencesService as unknown as UserPreferencesService
+    userPreferencesService as unknown as UserPreferencesService,
+    new WorklogCache()
   );
   return {facade, api, state, user$, range$};
 }
@@ -71,6 +74,37 @@ function currentWorklogs(state: WorklogState): Worklog[] {
   let value: Worklog[] = [];
   state.getWorklogs$().subscribe(worklogs => value = worklogs).unsubscribe();
   return value;
+}
+
+function currentFetching(state: WorklogState): boolean {
+  let value = false;
+  state.getFetching$().subscribe(fetching => value = fetching).unsubscribe();
+  return value;
+}
+
+function ids(state: WorklogState): string[] {
+  return currentWorklogs(state).map(wl => wl.id).sort();
+}
+
+/** Serves each range's worklogs (one issue per worklog, issue id = worklog issueId) from a map keyed by range start. */
+function serveRanges(api: ApiMock, data: Map<number, Worklog[]>): void {
+  const forRange = (range: DateRange) => data.get(range.start.getTime()) || [];
+  api.getIssuesForWorklogDateRange$.mockImplementation((range: DateRange) =>
+    searchPage(forRange(range).map(wl => issue(Number(wl.issueId))), undefined, true));
+  api.getWorklogsForIssue$.mockImplementation((id: string, range: DateRange) =>
+    worklogPage(forRange(range).filter(wl => wl.issueId === id)));
+}
+
+/** Makes every new search wait until the returned subject emits; worklog requests keep being served. */
+function holdSearches(api: ApiMock): Subject<SearchResults> {
+  const search = new Subject<SearchResults>();
+  api.getIssuesForWorklogDateRange$.mockImplementation(() => search);
+  return search;
+}
+
+function releaseSearch(search: Subject<SearchResults>, worklogs: Worklog[]): void {
+  search.next({issues: worklogs.map(wl => issue(Number(wl.issueId))), isLast: true});
+  search.complete();
 }
 
 describe('WorklogFacade', () => {
@@ -161,6 +195,137 @@ describe('WorklogFacade', () => {
       expect(calls[1][1]).toEqual(WEEK_A);
       expect(calls[1][2]).toBe(50);
       expect(currentWorklogs(state)).toHaveLength(60);
+    });
+  });
+
+  describe('cache of visited periods', () => {
+    const A1 = worklog('1', new Date(2026, 10, 24, 9, 0));
+    const A2 = worklog('2', new Date(2026, 10, 25, 9, 0));
+    const B1 = worklog('3', new Date(2026, 11, 1, 9, 0));
+
+    /** Logs in on week A, then visits week B; both load from Jira and end up cached. */
+    function visitAThenB() {
+      const setup = createFacade(WEEK_A);
+      const data = new Map<number, Worklog[]>([[WEEK_A.start.getTime(), [A1, A2]], [WEEK_B.start.getTime(), [B1]]]);
+      serveRanges(setup.api, data);
+      setup.user$.next(USER);
+      setup.range$.next(WEEK_B);
+      return {...setup, data};
+    }
+
+    it('shows a cached range at once, without the fetching flag, when returning to it', () => {
+      const {api, state, range$} = visitAThenB();
+      holdSearches(api);
+      api.getIssuesForWorklogDateRange$.mockClear();
+
+      range$.next(WEEK_A);
+
+      expect(ids(state)).toEqual(['1', '2']);
+      expect(currentFetching(state)).toBe(false);
+      expect(api.getIssuesForWorklogDateRange$).toHaveBeenCalledTimes(1);
+      expect(api.getIssuesForWorklogDateRange$.mock.calls[0][0]).toEqual(WEEK_A);
+    });
+
+    it('replaces cached data when the background refresh completes', () => {
+      const {api, state, range$, data} = visitAThenB();
+      const search = holdSearches(api);
+      range$.next(WEEK_A);
+
+      const A3 = worklog('4', new Date(2026, 10, 26, 9, 0));
+      api.getWorklogsForIssue$.mockImplementation((id: string) => worklogPage([A1, A3].filter(wl => wl.issueId === id)));
+      releaseSearch(search, [A1, A3]);
+      expect(ids(state)).toEqual(['1', '4']);
+      expect(currentFetching(state)).toBe(false);
+
+      serveRanges(api, data);
+      range$.next(WEEK_B);
+      expect(ids(state)).toEqual(['3']);
+      holdSearches(api);
+      range$.next(WEEK_A);
+      expect(ids(state)).toEqual(['1', '4']);
+    });
+
+    it('empties a revisited range whose worklogs were all removed in Jira', () => {
+      const {api, state, range$} = visitAThenB();
+      const search = holdSearches(api);
+      range$.next(WEEK_A);
+
+      releaseSearch(search, []);
+
+      expect(currentWorklogs(state)).toEqual([]);
+    });
+
+    it('keeps an edit made while a background refresh was running', () => {
+      const {api, facade, state, range$} = visitAThenB();
+      const search = holdSearches(api);
+      range$.next(WEEK_A);
+
+      const added = worklog('9', new Date(2026, 10, 27, 14, 0));
+      api.addWorklog$.mockReturnValue(of(added));
+      facade.addWorklog$({issueId: '9'}, new Date(2026, 10, 27, 14, 0), 900, '').subscribe();
+      releaseSearch(search, [A1, A2]);
+
+      expect(ids(state)).toEqual(['1', '2', '9']);
+    });
+
+    it('updates the cache on add, update and delete', () => {
+      const {api, facade, state, range$} = visitAThenB();
+      range$.next(WEEK_A);
+
+      const added = worklog('9', new Date(2026, 10, 27, 14, 0));
+      api.addWorklog$.mockReturnValue(of(added));
+      api.updateWorklog$.mockReturnValue(of({...A1, timeSpentSeconds: 3600}));
+      api.deleteWorklog$.mockReturnValue(of(undefined));
+      facade.addWorklog$({issueId: '9'}, new Date(2026, 10, 27, 14, 0), 900, '').subscribe();
+      facade.updateWorklog$(A1, new Date(2026, 10, 24, 9, 0), 3600, '').subscribe();
+      facade.deleteWorklog(A2);
+
+      range$.next(WEEK_B);
+      expect(ids(state)).toEqual(['3']);
+      holdSearches(api);
+      range$.next(WEEK_A);
+
+      expect(ids(state)).toEqual(['1', '9']);
+      expect(currentWorklogs(state).find(wl => wl.id === '1').timeSpentSeconds).toBe(3600);
+    });
+
+    it('clears the cache when the user logs out', () => {
+      const {api, state, user$, range$} = visitAThenB();
+      user$.next(null);
+      user$.next(USER);
+      holdSearches(api);
+
+      range$.next(WEEK_A);
+
+      expect(currentFetching(state)).toBe(true);
+    });
+
+    it('does not cache a range whose first load was interrupted', () => {
+      const {api, state, user$, range$} = createFacade(WEEK_A);
+      // Week A: issue 1 answers, issue 2 never does, so A is only partially loaded when the user moves on.
+      api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(1), issue(2)], undefined, true));
+      api.getWorklogsForIssue$.mockImplementation((id: string) =>
+        id === '1' ? worklogPage([A1]) : new Subject<WorklogWithPagination>());
+      user$.next(USER);
+      expect(ids(state)).toEqual(['1']);
+
+      serveRanges(api, new Map<number, Worklog[]>([[WEEK_B.start.getTime(), [B1]]]));
+      range$.next(WEEK_B);
+      expect(ids(state)).toEqual(['3']);
+
+      holdSearches(api);
+      range$.next(WEEK_A);
+      expect(currentFetching(state)).toBe(true);
+    });
+
+    it('keeps the spinner on manual refresh even when the range is cached', () => {
+      const {api, facade, state, range$} = visitAThenB();
+      range$.next(WEEK_A);
+      holdSearches(api);
+
+      facade.fetchWorklogsVerbose();
+
+      expect(currentFetching(state)).toBe(true);
     });
   });
 });
