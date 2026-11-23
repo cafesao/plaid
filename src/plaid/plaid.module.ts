@@ -1,5 +1,5 @@
 import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
+import {NgModule, provideZoneChangeDetection} from '@angular/core';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {PlaidComponent} from './components/plaid.component';
 import {GridComponent} from './components/grid/grid.component';
@@ -55,6 +55,8 @@ import {AddButtonComponent} from './components/top-bar/add-button/add-button.com
     FormsModule
   ],
   providers: [
+    // Angular 21 bootstraps without zone.js unless the module asks for it; the app relies on zone to refresh the screen
+    provideZoneChangeDetection({ eventCoalescing: true }),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
