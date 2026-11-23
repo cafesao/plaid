@@ -72,7 +72,6 @@
     "@angular/core": "~22.3.0",
     "@angular/forms": "~22.3.0",
     "@angular/platform-browser": "~22.3.0",
-    "@angular/router": "~22.3.0",
     "@openfonts/comfortaa_latin": "^1.44.5",
     "@openfonts/source-sans-pro_all": "^1.44.2",
     "electron-updater": "^6.8.11",

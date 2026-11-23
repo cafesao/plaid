@@ -89,6 +89,9 @@ Done means `pnpm check` exits 0, plus `pnpm test:e2e` when a screen flow changed
   `cmd.exe /c ...`.
 - The manual test runs on Windows in `C:\dev\plaid` (Node 26 and pnpm 12 installed there): real login, weeks, and
   adding/editing/deleting a test work log.
+- Clones made before `.gitattributes` existed (Windows, `core.autocrlf=true`) keep CRLF in files that did not change
+  since; `pnpm check` then fails on them while `git status` is clean. Re-checkout once: `git rm -r --cached -q .`
+  followed by `git reset --hard`.
 - Unit tests replace `ElectronService` with `src/__mocks__/electron.service.ts` through `src/test-providers.ts`.
 
 ## Specs and plans
