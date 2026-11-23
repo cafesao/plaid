@@ -54,7 +54,8 @@ describe('WorklogApi', () => {
       const request = http.expectOne(req => req.url.startsWith('/rest/api/2/issue/10/worklog'));
       const url = requestUrl(request);
       expect(url.pathname).toBe('/rest/api/2/issue/10/worklog');
-      expect(url.searchParams.get('startedAfter')).toBe(String(new Date(2026, 10, 23).getTime()));
+      // startedAfter may be exclusive: one millisecond earlier keeps a worklog started at 00:00 of the first day.
+      expect(url.searchParams.get('startedAfter')).toBe(String(new Date(2026, 10, 23).getTime() - 1));
       expect(url.searchParams.get('startedBefore')).toBe(String(new Date(2026, 10, 30).getTime()));
       expect(url.searchParams.has('startAt')).toBe(false);
       request.flush({startAt: 0, total: 0, worklogs: []});
@@ -66,7 +67,7 @@ describe('WorklogApi', () => {
       const request = http.expectOne(req => req.url.startsWith('/rest/api/2/issue/10/worklog'));
       const url = requestUrl(request);
       expect(url.searchParams.get('startAt')).toBe('50');
-      expect(url.searchParams.get('startedAfter')).toBe(String(new Date(2026, 10, 23).getTime()));
+      expect(url.searchParams.get('startedAfter')).toBe(String(new Date(2026, 10, 23).getTime() - 1));
       expect(url.searchParams.get('startedBefore')).toBe(String(new Date(2026, 10, 30).getTime()));
       request.flush({startAt: 50, total: 60, worklogs: []});
     });

@@ -48,7 +48,8 @@ export class WorklogApi {
    */
   getWorklogsForIssue$(issueId: string, dateRange: DateRange, startAt = 0): Observable<WorklogWithPagination> {
     let url = this.getWorklogsUrl.replace('{issueIdOrKey}', issueId)
-      + '?startedAfter=' + dateRange.start.getTime()
+      // startedAfter may be exclusive; one millisecond earlier keeps a worklog started at 00:00 of the first day.
+      + '?startedAfter=' + (dateRange.start.getTime() - 1)
       + '&startedBefore=' + Calendar.dayAfter(dateRange.end).getTime();
     if (startAt > 0) {
       url += '&startAt=' + startAt;

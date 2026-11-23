@@ -196,6 +196,16 @@ describe('WorklogFacade', () => {
       expect(calls[1][2]).toBe(50);
       expect(currentWorklogs(state)).toHaveLength(60);
     });
+    it('stops paging an issue when Jira returns an empty worklog page', () => {
+      const {api, user$} = createFacade();
+      api.getIssuesForWorklogDateRange$.mockReturnValue(searchPage([issue(7)], undefined, true));
+      // total still counts worklogs the period filter left out; a second request would ask for the same page again
+      api.getWorklogsForIssue$.mockReturnValueOnce(worklogPage([], 0, 60)).mockReturnValue(worklogPage([], 0, 0));
+
+      user$.next(USER);
+
+      expect(api.getWorklogsForIssue$).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('cache of visited periods', () => {
@@ -256,16 +266,52 @@ describe('WorklogFacade', () => {
     });
 
     it('keeps an edit made while a background refresh was running', () => {
-      const {api, facade, state, range$} = visitAThenB();
+      const {api, facade, state, range$, data} = visitAThenB();
       const search = holdSearches(api);
       range$.next(WEEK_A);
 
       const added = worklog('9', new Date(2026, 10, 27, 14, 0));
       api.addWorklog$.mockReturnValue(of(added));
       facade.addWorklog$({issueId: '9'}, new Date(2026, 10, 27, 14, 0), 900, '').subscribe();
-      releaseSearch(search, [A1, A2]);
+      data.set(WEEK_A.start.getTime(), [A1, A2, added]); // Jira has the new worklog from now on
+      serveRanges(api, data);
+      releaseSearch(search, [A1, A2]); // the refresh started before the save answers without it
 
       expect(ids(state)).toEqual(['1', '2', '9']);
+    });
+
+    it('checks the period again when an edit was saved during the background refresh', () => {
+      const {api, facade, state, range$, data} = visitAThenB();
+      const search = holdSearches(api);
+      range$.next(WEEK_A);
+
+      const added = worklog('9', new Date(2026, 10, 27, 14, 0));
+      api.addWorklog$.mockReturnValue(of(added));
+      facade.addWorklog$({issueId: '9'}, new Date(2026, 10, 27, 14, 0), 900, '').subscribe();
+      data.set(WEEK_A.start.getTime(), [A1, added]); // meanwhile A2 was deleted in Jira by someone else
+      serveRanges(api, data);
+      releaseSearch(search, [A1, A2]);
+
+      expect(ids(state)).toEqual(['1', '9']);
+    });
+
+    it('does not cache a first load during which an edit was saved, and checks it again', () => {
+      const {api, facade, state, user$, range$} = createFacade(WEEK_A);
+      const search = holdSearches(api);
+      user$.next(USER);
+
+      const added = worklog('9', new Date(2026, 10, 27, 14, 0));
+      api.addWorklog$.mockReturnValue(of(added));
+      facade.addWorklog$({issueId: '9'}, new Date(2026, 10, 27, 14, 0), 900, '').subscribe();
+      const data = new Map<number, Worklog[]>([[WEEK_A.start.getTime(), [A1, added]], [WEEK_B.start.getTime(), [B1]]]);
+      serveRanges(api, data);
+      releaseSearch(search, [A1]); // the first load started before the save answers without it
+      expect(ids(state)).toEqual(['1', '9']);
+
+      range$.next(WEEK_B);
+      holdSearches(api);
+      range$.next(WEEK_A);
+      expect(ids(state)).toEqual(['1', '9']);
     });
 
     it('updates the cache on add, update and delete', () => {
