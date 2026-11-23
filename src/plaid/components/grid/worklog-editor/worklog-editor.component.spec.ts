@@ -1,6 +1,7 @@
 import type {Mock} from 'vitest';
-import {BehaviorSubject, type Observable, of, Subject} from 'rxjs';
+import {BehaviorSubject, type Observable, of, Subject, throwError} from 'rxjs';
 import type {ChangeDetectorRef} from '@angular/core';
+import {HttpErrorResponse} from '@angular/common/http';
 import type {AuthFacade} from '../../../core/auth/auth.facade';
 import type {AppStateService} from '../../../core/app-state.service';
 import type {WorklogFacade} from '../../../core/worklog/worklog.facade';
@@ -16,34 +17,48 @@ const ISSUE_1 = issue(1); // automatic suggestion
 const ISSUE_2 = issue(2); // picked by hand
 const ISSUE_3 = issue(3); // of an existing worklog
 
-// Tests drive the component class directly: the date range lies outside the edited day, so the panel is never measured.
+type WorklogFacadeMock = {
+  addWorklog$: Mock<(...args: unknown[]) => Observable<Worklog>>;
+  updateWorklog$: Mock<(...args: unknown[]) => Observable<Worklog>>;
+};
+
+/**
+ * Builds the editor class directly (no TestBed): the date range lies outside the edited day, so the panel is never
+ * measured.
+ */
+function createEditor(): {editor: WorklogEditorComponent; worklogDraft: WorklogDraftService; worklogFacade: WorklogFacadeMock} {
+  const authFacade = {
+    getAuthInfo$: () => new BehaviorSubject<AuthInfo>({jiraUrl: 'https://jira.test', username: 'a', password: 'a'}),
+    getAuthenticatedUser$: () => new BehaviorSubject<User>({self: 'https://jira.test/rest/api/2/user?accountId=a'})
+  };
+  const worklogDraft = new WorklogDraftService(authFacade as unknown as AuthFacade);
+  const worklogFacade: WorklogFacadeMock = {addWorklog$: vi.fn(() => of({id: '30001'})), updateWorklog$: vi.fn(() => of({}))};
+  const editor = new WorklogEditorComponent(
+    {detectChanges: vi.fn()} as unknown as ChangeDetectorRef,
+    authFacade as unknown as AuthFacade,
+    worklogFacade as unknown as WorklogFacade,
+    {} as AppStateService,
+    worklogDraft
+  );
+  editor.dateRange = {start: new Date(2020, 0, 6), end: new Date(2020, 0, 12)};
+  editor.visibleDaysStart = 0;
+  editor.visibleDaysEnd = 6;
+  return {editor, worklogDraft, worklogFacade};
+}
+
+/** Opens the editor for adding, the way the top bar "+" and the grid gaps do. */
+function openAddIn(editor: WorklogEditorComponent, hour = 9): void {
+  editor.worklog = {started: new Date(2026, 10, 24, hour).getTime(), timeSpentSeconds: 3600};
+}
+
 describe('WorklogEditorComponent draft', () => {
   let editor: WorklogEditorComponent;
   let worklogDraft: WorklogDraftService;
-  let worklogFacade: {addWorklog$: Mock<(...args: unknown[]) => Observable<Worklog>>; updateWorklog$: Mock};
-
-  /** Opens the editor for adding, the way the top bar "+" and the grid gaps do. */
-  function openAdd(hour = 9): void {
-    editor.worklog = {started: new Date(2026, 10, 24, hour).getTime(), timeSpentSeconds: 3600};
-  }
+  let worklogFacade: WorklogFacadeMock;
+  const openAdd = (hour = 9) => openAddIn(editor, hour);
 
   beforeEach(() => {
-    const authFacade = {
-      getAuthInfo$: () => new BehaviorSubject<AuthInfo>({jiraUrl: 'https://jira.test', username: 'a', password: 'a'}),
-      getAuthenticatedUser$: () => new BehaviorSubject<User>({self: 'https://jira.test/rest/api/2/user?accountId=a'})
-    };
-    worklogDraft = new WorklogDraftService(authFacade as unknown as AuthFacade);
-    worklogFacade = {addWorklog$: vi.fn(() => of({id: '30001'})), updateWorklog$: vi.fn(() => of({}))};
-    editor = new WorklogEditorComponent(
-      {detectChanges: vi.fn()} as unknown as ChangeDetectorRef,
-      authFacade as unknown as AuthFacade,
-      worklogFacade as unknown as WorklogFacade,
-      {} as AppStateService,
-      worklogDraft
-    );
-    editor.dateRange = {start: new Date(2020, 0, 6), end: new Date(2020, 0, 12)};
-    editor.visibleDaysStart = 0;
-    editor.visibleDaysEnd = 6;
+    ({editor, worklogDraft, worklogFacade} = createEditor());
   });
 
   afterEach(() => {
@@ -142,5 +157,149 @@ describe('WorklogEditorComponent draft', () => {
 
     editor.cancel();
     expect(worklogDraft.get()).toEqual({issue: ISSUE_2, comment: 'Draft'});
+  });
+});
+
+describe('WorklogEditorComponent saving', () => {
+  let editor: WorklogEditorComponent;
+  let worklogFacade: WorklogFacadeMock;
+  const openAdd = () => openAddIn(editor);
+  const key = (k: string) => editor.onKeydown(new KeyboardEvent('keydown', {key: k}));
+  const rejected = () => throwError(() => new HttpErrorResponse({status: 500}));
+
+  beforeEach(() => {
+    ({editor, worklogFacade} = createEditor());
+    // Enter compares the focused element with these two
+    editor.cancelButton = {nativeElement: document.createElement('button')};
+    editor.commentTextArea = {nativeElement: document.createElement('textarea')};
+  });
+
+  afterEach(() => {
+    editor.worklog = null; // removes the keydown listener
+  });
+
+  it('leaves saving and stays open when Jira rejects a new entry', () => {
+    worklogFacade.addWorklog$.mockReturnValue(rejected());
+    openAdd();
+    editor.selectIssue(ISSUE_2);
+    editor.commentString = 'Draft';
+    editor.save();
+    expect(editor.saving).toBe(false);
+    expect(editor.worklog).not.toBeNull();
+    expect(editor.commentString).toBe('Draft');
+  });
+
+  it('leaves saving and stays open when Jira rejects an edited entry', () => {
+    worklogFacade.updateWorklog$.mockReturnValue(rejected());
+    editor.worklog = {
+      id: '5',
+      issueId: '10003',
+      issue: ISSUE_3,
+      comment: 'Old',
+      started: new Date(2026, 10, 24, 9).getTime(),
+      timeSpentSeconds: 3600
+    };
+    editor.save();
+    expect(editor.saving).toBe(false);
+    expect(editor.worklog).not.toBeNull();
+  });
+
+  it('does not send twice when saving is triggered again', () => {
+    worklogFacade.addWorklog$.mockReturnValue(new Subject<Worklog>());
+    openAdd();
+    editor.selectIssue(ISSUE_2);
+    editor.save();
+    editor.save();
+    key('Enter');
+    expect(worklogFacade.addWorklog$).toHaveBeenCalledTimes(1);
+  });
+
+  it('Enter does nothing without an issue', () => {
+    openAdd();
+    key('Enter');
+    expect(worklogFacade.addWorklog$).not.toHaveBeenCalled();
+    expect(editor.saving).toBe(false);
+  });
+
+  it('Escape does nothing while saving', () => {
+    worklogFacade.addWorklog$.mockReturnValue(new Subject<Worklog>());
+    openAdd();
+    editor.selectIssue(ISSUE_2);
+    editor.save();
+    key('Escape');
+    expect(editor.worklog).not.toBeNull();
+  });
+
+  it('Escape still closes when not saving', () => {
+    openAdd();
+    key('Escape');
+    expect(editor.worklog).toBeNull();
+  });
+});
+
+// The editor can close while a save is in flight (login expired, lost connection, the day leaving the visible days).
+// The answer to that save must only act on the editor session that sent it.
+describe('WorklogEditorComponent late save answers', () => {
+  let editor: WorklogEditorComponent;
+  let worklogDraft: WorklogDraftService;
+  let worklogFacade: WorklogFacadeMock;
+  let first: Subject<Worklog>;
+  let second: Subject<Worklog>;
+  const openAdd = () => openAddIn(editor);
+
+  /** Starts adding entry A and closes the editor while A is still being sent. */
+  function sendAAndCloseMidway(): void {
+    openAdd();
+    editor.selectIssue(ISSUE_2);
+    editor.commentString = 'A';
+    editor.save();
+    editor.visibleDaysStart = 3; // Tuesday leaves the visible days: the editor closes
+    editor.visibleDaysStart = 0;
+  }
+
+  beforeEach(() => {
+    ({editor, worklogDraft, worklogFacade} = createEditor());
+    first = new Subject<Worklog>();
+    second = new Subject<Worklog>();
+    worklogFacade.addWorklog$.mockReturnValueOnce(first).mockReturnValueOnce(second);
+  });
+
+  afterEach(() => {
+    editor.worklog = null; // removes the keydown listener
+  });
+
+  it('a late error does not re-enable a newer save', () => {
+    sendAAndCloseMidway();
+    openAdd();
+    editor.commentString = 'B';
+    editor.save();
+    first.error(new HttpErrorResponse({status: 500}));
+    expect(editor.saving).toBe(true);
+    expect(editor.canSave()).toBe(false);
+  });
+
+  it('a late success does not close a newer editor', () => {
+    sendAAndCloseMidway();
+    openAdd();
+    first.next({id: '30001'});
+    first.complete();
+    expect(editor.worklog).not.toBeNull();
+  });
+
+  it('a late success drops the draft of the entry it saved', () => {
+    sendAAndCloseMidway();
+    first.next({id: '30001'});
+    first.complete();
+    expect(worklogDraft.get()).toBeNull();
+  });
+
+  it('a late success keeps what was typed afterwards', () => {
+    sendAAndCloseMidway();
+    openAdd();
+    editor.commentString = 'Newer';
+    editor.close();
+    first.next({id: '30001'});
+    first.complete();
+    expect(worklogDraft.get()).toEqual({issue: ISSUE_2, comment: 'Newer'});
   });
 });

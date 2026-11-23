@@ -245,7 +245,7 @@ export class WorklogEditorComponent implements OnInit {
           } else if (this.issuePickerOpen) {
             this.toggleIssuePicker();
             this.issuePickerToggle.nativeElement.focus();
-          } else {
+          } else if (!this.saving) {
             this.close();
           }
           break;
@@ -562,27 +562,55 @@ export class WorklogEditorComponent implements OnInit {
    * Updates worklog on the server (or adds new to the server) and closes the editor if update was successful
    */
   save(): void {
+    if (!this.canSave()) {
+      return;
+    }
     this.saving = true;
+    // The editor may close while the request is in flight (login expired, lost connection, day no longer visible) and
+    // reopen for another worklog: the answer only acts on the editor session that sent it.
+    const session = this._worklog;
+    const sentComment = this.commentString;
+    const isCurrent = () => this._worklog === session;
+    // On an error the app's error dialog explains it; the editor leaves "saving" and keeps what the user entered.
+    const stopSaving = () => {
+      if (isCurrent()) {
+        this.saving = false;
+        this.cdr.detectChanges();
+      }
+    };
     if (this.adding) {
       this.worklogFacade.addWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
         next: () => {
-          this.worklogDraft.clear();
-          this.hide();
+          const draft = this.worklogDraft.get();
+          if (isCurrent() || (draft && draft.comment === sentComment && (!draft.issue || draft.issue.id === session.issueId))) {
+            this.worklogDraft.clear();
+          }
+          if (isCurrent()) {
+            this.hide();
+          }
         },
-        complete: () => {
-          this.saving = false;
-          this.cdr.detectChanges();
-        }
+        error: stopSaving,
+        complete: stopSaving
       });
     } else {
       this.worklogFacade.updateWorklog$(this.worklog, this.start, this.durationMinutes * 60, this.commentString).subscribe({
-        next: () => this.close(),
-        complete: () => {
-          this.saving = false;
-          this.cdr.detectChanges();
-        }
+        next: () => {
+          if (isCurrent()) {
+            this.close();
+          }
+        },
+        error: stopSaving,
+        complete: stopSaving
       });
     }
+  }
+
+  /**
+   * Whether the worklog can be sent now: not already sending, and with an issue. The Add/Save button, Enter and save()
+   * all follow this rule, so the same entry is never sent twice.
+   */
+  canSave(): boolean {
+    return !this.saving && !!this.worklog && !!this.worklog.issueId;
   }
 
   isDateVisible(date: Date): boolean {
