@@ -53,8 +53,13 @@ export class IssuePickerCloudComponent implements OnInit {
   @Output()
   openChange = new EventEmitter<boolean>();
 
+  /** The issue the user picked. */
   @Output()
   issueChange = new EventEmitter<Issue>();
+
+  /** The first automatic suggestion (or null), each time suggestions are fetched. */
+  @Output()
+  suggestedIssueChange = new EventEmitter<Issue>();
 
   @Input()
   updateFavoritesAndSuggestionsAndEmitSuggestion: Observable<void>;
@@ -100,11 +105,7 @@ export class IssuePickerCloudComponent implements OnInit {
     });
     this.issueFacade.getSuggestions$().subscribe(suggestions => {
       this.suggestions = suggestions;
-      if (suggestions.length > 0) {
-        this.issueChange.emit(suggestions[0]);
-      } else {
-        this.issueChange.emit(null);
-      }
+      this.suggestedIssueChange.emit(suggestions.length > 0 ? suggestions[0] : null);
       this.cdr.detectChanges();
     });
   }
