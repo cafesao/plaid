@@ -9,7 +9,7 @@
 
 ![Screenshot](https://raw.githubusercontent.com/piotrmski/plaid/master/screenshot.png)
 
-Plaid lets you get a better overview of your Jira worklog. Add, edit and remove your worklog entries, which are neatly laid out on a calendar. Works both with Jira Server and Jira Cloud.
+Plaid lets you get a better overview of your Jira worklog. Add, edit and remove your worklog entries, which are neatly laid out on a calendar. Works with Jira Cloud only. Jira Server/Data Center stopped working in October 2025, when issue search moved to /rest/api/3/search/jql (required by Jira Cloud), an endpoint that Jira Server does not have.
 
 
 ## Features
@@ -76,40 +76,54 @@ sudo snap install plaid
 
 ## Development
 
-Make sure you have `npm` installed on your system and available globally. Then install the dependencies:
+You need Node 26 (see `.nvmrc`) and pnpm 12 (the exact version is pinned in `package.json`). Install the dependencies:
 
 ```
-npm install
+pnpm install
 ```
 
 At this point you can start debugging the application by serving the Angular project:
 
 ```
-npm run serve-dev
+pnpm serve-dev
 ```
 
-and in a separate terminal running Electron:
+and in a separate terminal running Electron (its binary is downloaded on the first run):
 
 ```
-npm run start-dev
+pnpm start-dev
 ```
+
+Before committing, run the same check the CI runs (lint, formatting, types, unit tests, production build):
+
+```
+pnpm check
+```
+
+End-to-end tests run against a fake Jira (install Chromium once with `pnpm exec playwright install chromium`):
+
+```
+pnpm test:e2e
+```
+
+See `AGENTS.md` for the full list of commands and how the project is organized.
 
 ### Building
 
 To build the Angular project to `./build`, run:
 
 ```
-npm run build
+pnpm build
 ```
 
 The built project can then be run without packaging:
 
 ```
-npm run start
+pnpm start
 ```
 
 After building, you can also package the project for the current platform to `./dist`:
 
 ```
-npm run package
+pnpm package
 ```

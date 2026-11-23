@@ -1,17 +1,17 @@
 const {app, BrowserWindow, Menu, ipcMain, nativeTheme, shell} = require('electron');
 const {autoUpdater} = require('electron-updater');
 const {getNewWindowRect, getNewWindowMaximized, saveWindowState} = require('./window-state');
-const path = require('path');
-const os = require('os');
+const path = require('node:path');
+const os = require('node:os');
 
 let firstWindowCreated = false;
 
 // IPC handlers for nativeTheme
 ipcMain.handle('native-theme:shouldUseDarkColors', () => nativeTheme.shouldUseDarkColors);
-ipcMain.handle('native-theme:setSource', (event, source) => {
+ipcMain.handle('native-theme:setSource', (_event, source) => {
   nativeTheme.themeSource = source;
 });
-ipcMain.handle('shell:openExternal', (event, url) => shell.openExternal(url));
+ipcMain.handle('shell:openExternal', (_event, url) => shell.openExternal(url));
 
 // Workaround for https://github.com/electron/electron/issues/23664
 app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
@@ -22,7 +22,8 @@ if (process.platform === 'linux' && os.release().toLowerCase().includes('microso
 }
 
 function createWindow(dev) {
-  if (!firstWindowCreated) { // Check for update once in the process (if subsequent windows are opened, don't check again)
+  if (!firstWindowCreated) {
+    // Check for update once in the process (if subsequent windows are opened, don't check again)
     autoUpdater.checkForUpdatesAndNotify(); // Note to self: don't mess that one up!
   }
 
@@ -63,32 +64,38 @@ function createWindow(dev) {
     callback({cancel: false, requestHeaders: details.requestHeaders});
   });
 
-  window.webContents.addListener('context-menu', (e, params) => {
+  window.webContents.addListener('context-menu', (_e, params) => {
     if (params.isEditable || params.inputFieldType !== 'none') {
       Menu.buildFromTemplate([
         {
           label: 'Undo',
           role: 'undo',
           enabled: params.editFlags.canUndo
-        }, {
+        },
+        {
           label: 'Redo',
           role: 'redo',
           enabled: params.editFlags.canRedo
-        }, {
-          type: 'separator',
-        }, {
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Cut',
           role: 'cut',
           enabled: params.editFlags.canCut
-        }, {
+        },
+        {
           label: 'Copy',
           role: 'copy',
           enabled: params.editFlags.canCopy
-        }, {
+        },
+        {
           label: 'Paste',
           role: 'paste',
           enabled: params.editFlags.canPaste
-        }, {
+        },
+        {
           label: 'Select all',
           role: 'selectAll',
           enabled: params.editFlags.canSelectAll
@@ -111,7 +118,7 @@ function createWindow(dev) {
   firstWindowCreated = true;
 }
 
-module.exports = function(dev) {
+module.exports = dev => {
   if (app.requestSingleInstanceLock()) {
     app.on('ready', () => createWindow(dev));
     app.on('second-instance', () => createWindow(dev));

@@ -3,7 +3,7 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {Theme} from '../model/theme';
 import {FavoriteKeys} from '../model/favorite-keys';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class UserPreferencesService {
   private readonly WORKING_HOURS_START_MINUTES = 'WORKING_HOURS_START_MINUTES';
   private readonly WORKING_HOURS_END_MINUTES = 'WORKING_HOURS_END_MINUTES';
@@ -14,28 +14,30 @@ export class UserPreferencesService {
   private readonly THEME = 'THEME';
   private readonly FAVORITE_KEYS = 'FAVORITE_KEYS';
 
-  private workingHoursStartMinutes: BehaviorSubject<number> =
-    new BehaviorSubject<number>(Number(localStorage.getItem(this.WORKING_HOURS_START_MINUTES) || 540));
-  private workingHoursEndMinutes: BehaviorSubject<number> =
-    new BehaviorSubject<number>(Number(localStorage.getItem(this.WORKING_HOURS_END_MINUTES) || 1020));
-  private workingDaysStart: BehaviorSubject<number> =
-    new BehaviorSubject<number>(Number(localStorage.getItem(this.WORKING_DAYS_START) || 1));
-  private workingDaysEnd: BehaviorSubject<number> =
-    new BehaviorSubject<number>(Number(localStorage.getItem(this.WORKING_DAYS_END) || 5));
-  private hideWeekend: BehaviorSubject<boolean> =
-    new BehaviorSubject<boolean>(localStorage.getItem(this.HIDE_WEEKEND) === '1');
+  private workingHoursStartMinutes: BehaviorSubject<number> = new BehaviorSubject<number>(
+    Number(localStorage.getItem(this.WORKING_HOURS_START_MINUTES) || 540)
+  );
+  private workingHoursEndMinutes: BehaviorSubject<number> = new BehaviorSubject<number>(
+    Number(localStorage.getItem(this.WORKING_HOURS_END_MINUTES) || 1020)
+  );
+  private workingDaysStart: BehaviorSubject<number> = new BehaviorSubject<number>(
+    Number(localStorage.getItem(this.WORKING_DAYS_START) || 1)
+  );
+  private workingDaysEnd: BehaviorSubject<number> = new BehaviorSubject<number>(Number(localStorage.getItem(this.WORKING_DAYS_END) || 5));
+  private hideWeekend: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(localStorage.getItem(this.HIDE_WEEKEND) === '1');
   private visibleDaysStart: BehaviorSubject<number> = new BehaviorSubject<number>(
     localStorage.getItem(this.HIDE_WEEKEND) === '1' ? Number(localStorage.getItem(this.WORKING_DAYS_START) || 1) : 0
   );
   private visibleDaysEnd: BehaviorSubject<number> = new BehaviorSubject<number>(
     localStorage.getItem(this.HIDE_WEEKEND) === '1' ? Number(localStorage.getItem(this.WORKING_DAYS_END) || 5) : 6
   );
-  private refreshIntervalMinutes: BehaviorSubject<number> =
-    new BehaviorSubject<number>(Number(localStorage.getItem(this.REFRESH_INTERVAL) || 0));
-  private theme: BehaviorSubject<Theme> =
-    new BehaviorSubject<Theme>((localStorage.getItem(this.THEME) || 'system') as Theme);
-  private favoriteKeys: BehaviorSubject<FavoriteKeys> =
-    new BehaviorSubject<FavoriteKeys>((JSON.parse(localStorage.getItem(this.FAVORITE_KEYS) || '{}')) as FavoriteKeys);
+  private refreshIntervalMinutes: BehaviorSubject<number> = new BehaviorSubject<number>(
+    Number(localStorage.getItem(this.REFRESH_INTERVAL) || 0)
+  );
+  private theme: BehaviorSubject<Theme> = new BehaviorSubject<Theme>((localStorage.getItem(this.THEME) || 'system') as Theme);
+  private favoriteKeys: BehaviorSubject<FavoriteKeys> = new BehaviorSubject<FavoriteKeys>(
+    JSON.parse(localStorage.getItem(this.FAVORITE_KEYS) || '{}') as FavoriteKeys
+  );
 
   setWorkingHoursStartMinutes(value: number): void {
     this.workingHoursStartMinutes.next(value);

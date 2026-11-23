@@ -17,11 +17,13 @@ export class WorklogPanelsManagerService {
   private timeoutSetTime = 0;
   private darkMode: boolean;
 
-  constructor(private systemPreferencesService: SystemPreferencesService) {
+  constructor(systemPreferencesService: SystemPreferencesService) {
     fromEvent(window, 'resize').subscribe(() => this.scheduleCheckSizeAndPosition());
     systemPreferencesService.getDarkMode$().subscribe(darkMode => {
       this.darkMode = darkMode;
-      this.panels.forEach(panel => panel.darkMode = this.darkMode);
+      this.panels.forEach(panel => {
+        panel.darkMode = this.darkMode;
+      });
     });
   }
 
@@ -38,13 +40,19 @@ export class WorklogPanelsManagerService {
   }
 
   scheduleCheckSizeAndPosition(): void {
-    const now: number = new Date().getTime();
+    const now: number = Date.now();
     if (Math.abs(now - this.timeoutSetTime) > 10) {
       this.timeoutSetTime = now;
       if (this.timeout != null) {
         clearTimeout(this.timeout);
       }
-      this.timeout = setTimeout(() => this.panels.forEach(panel => panel.checkSizeAndPosition()), 250);
+      this.timeout = setTimeout(
+        () =>
+          this.panels.forEach(panel => {
+            panel.checkSizeAndPosition();
+          }),
+        250
+      );
     }
   }
 }

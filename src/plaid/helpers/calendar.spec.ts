@@ -1,5 +1,5 @@
-import { Calendar } from './calendar';
-import { DateRange } from '../model/date-range';
+import {Calendar} from './calendar';
+import {DateRange} from '../model/date-range';
 
 describe('Calendar', () => {
   describe('months', () => {
@@ -19,7 +19,9 @@ describe('Calendar', () => {
     });
 
     it('should have 3-letter abbreviations', () => {
-      Calendar.monthsShort.forEach(m => expect(m).toHaveLength(3));
+      for (const m of Calendar.monthsShort) {
+        expect(m).toHaveLength(3);
+      }
     });
   });
 
@@ -43,7 +45,9 @@ describe('Calendar', () => {
     it('should return weeks of 7 days each', () => {
       const month = new Date(2024, 0, 1); // January 2024
       const weeks = Calendar.getDaysOfMonth(month);
-      weeks.forEach(week => expect(week).toHaveLength(7));
+      for (const week of weeks) {
+        expect(week).toHaveLength(7);
+      }
     });
 
     it('should contain all days of the month', () => {
@@ -52,9 +56,7 @@ describe('Calendar', () => {
       const allDays = weeks.flat();
       // All 31 days of January should be present
       for (let d = 1; d <= 31; d++) {
-        expect(allDays.some(date =>
-          date.getFullYear() === 2024 && date.getMonth() === 0 && date.getDate() === d
-        )).toBe(true);
+        expect(allDays.some(date => date.getFullYear() === 2024 && date.getMonth() === 0 && date.getDate() === d)).toBe(true);
       }
     });
 
@@ -71,22 +73,16 @@ describe('Calendar', () => {
       const month = new Date(2024, 1, 1); // February 2024 (leap year, 29 days)
       const weeks = Calendar.getDaysOfMonth(month);
       const allDays = weeks.flat();
-      expect(allDays.some(date =>
-        date.getFullYear() === 2024 && date.getMonth() === 1 && date.getDate() === 29
-      )).toBe(true);
+      expect(allDays.some(date => date.getFullYear() === 2024 && date.getMonth() === 1 && date.getDate() === 29)).toBe(true);
     });
 
     it('should handle February in a non-leap year', () => {
       const month = new Date(2023, 1, 1); // February 2023 (28 days)
       const weeks = Calendar.getDaysOfMonth(month);
       const allDays = weeks.flat();
-      expect(allDays.some(date =>
-        date.getFullYear() === 2023 && date.getMonth() === 1 && date.getDate() === 28
-      )).toBe(true);
+      expect(allDays.some(date => date.getFullYear() === 2023 && date.getMonth() === 1 && date.getDate() === 28)).toBe(true);
       // Day 29 should NOT be in February
-      expect(allDays.some(date =>
-        date.getMonth() === 1 && date.getDate() === 29
-      )).toBe(false);
+      expect(allDays.some(date => date.getMonth() === 1 && date.getDate() === 29)).toBe(false);
     });
 
     it('should handle a month starting on Sunday', () => {

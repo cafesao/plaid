@@ -1,10 +1,11 @@
 import {BrowserModule} from '@angular/platform-browser';
-import {NgModule} from '@angular/core';
+import {NgModule, provideZoneChangeDetection} from '@angular/core';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {PlaidComponent} from './components/plaid.component';
 import {GridComponent} from './components/grid/grid.component';
 import {WorklogPanelComponent} from './components/grid/worklog-panel/worklog-panel.component';
 import {AuthInterceptor} from './core/auth/auth.interceptor';
+import {RateLimitRetryInterceptor} from './core/http/rate-limit-retry.interceptor';
 import {ConnectionIssueResolverComponent} from './components/connection-issue-resolver/connection-issue-resolver.component';
 import {FormsModule} from '@angular/forms';
 import {DateRangePickerComponent} from './components/top-bar/date-range-picker/date-range-picker.component';
@@ -49,19 +50,22 @@ import {AddButtonComponent} from './components/top-bar/add-button/add-button.com
     IssueListItemComponent,
     AddButtonComponent
   ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    FormsModule
-  ],
+  imports: [BrowserModule, HttpClientModule, FormsModule],
   providers: [
+    // Angular 21 bootstraps without zone.js unless the module asks for it; the app relies on zone to refresh the screen
+    provideZoneChangeDetection({eventCoalescing: true}),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true
+    },
+    {
+      // Must come after AuthInterceptor: it retries HTTP 429 before AuthInterceptor reports the error.
+      provide: HTTP_INTERCEPTORS,
+      useClass: RateLimitRetryInterceptor,
       multi: true
     }
   ],
   bootstrap: [PlaidComponent]
 })
-export class PlaidModule {
-}
+export class PlaidModule {}

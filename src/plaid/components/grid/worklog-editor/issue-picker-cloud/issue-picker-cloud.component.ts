@@ -1,5 +1,6 @@
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -64,24 +65,28 @@ export class IssuePickerCloudComponent implements OnInit {
   @Input()
   keysDisabled: boolean;
 
-  constructor(private issueFacade: IssueFacade, private cdr: ChangeDetectorRef) {
-  }
+  constructor(
+    private issueFacade: IssueFacade,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
-    this.searchInputSubject.pipe(
-      debounceTime(250),
-      tap(() => {
-        this.searching = true;
+    this.searchInputSubject
+      .pipe(
+        debounceTime(250),
+        tap(() => {
+          this.searching = true;
+          this.cdr.detectChanges();
+        }),
+        switchMap(s => this.issueFacade.quickSearch$(s))
+      )
+      .subscribe(res => {
+        this.searching = false;
+        if (this.searchInput.nativeElement.value) {
+          this.searchResults = res;
+        }
         this.cdr.detectChanges();
-      }),
-      switchMap(s => this.issueFacade.quickSearch$(s))
-    ).subscribe(res => {
-      this.searching = false;
-      if (this.searchInput.nativeElement.value) {
-        this.searchResults = res;
-      }
-      this.cdr.detectChanges();
-    });
+      });
 
     if (this.updateFavoritesAndSuggestionsAndEmitSuggestion != null) {
       this.updateFavoritesAndSuggestionsAndEmitSuggestion.subscribe(() => {
@@ -132,5 +137,4 @@ export class IssuePickerCloudComponent implements OnInit {
   get suggestionsWithoutFavorites(): Issue[] {
     return this.suggestions.filter(issue => !this.favorites.find(favorite => favorite.key === issue.key));
   }
-
 }

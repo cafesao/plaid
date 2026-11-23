@@ -1,0 +1,7 @@
+build/
+dist/
+node_modules/
+.angular/
+test-results/
+playwright-report/
+pnpm-lock.yaml

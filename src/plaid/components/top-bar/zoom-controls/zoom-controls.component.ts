@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 
 /**
  * Dumb component, presents two buttons, handles zoom change shortcuts and delegates change in pixelsPerMinute value.
@@ -6,6 +6,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 @Component({
   standalone: false,
   selector: 'plaid-zoom-controls',
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './zoom-controls.component.html'
 })
 export class ZoomControlsComponent implements OnInit {
@@ -31,23 +32,30 @@ export class ZoomControlsComponent implements OnInit {
   ngOnInit(): void {
     this.emitChange();
     // Singleton component, no need to unbind events
-    addEventListener('wheel', (e: WheelEvent) => { // Ctrl mouse wheel, Ctrl two finger swipe, pinch
-      if (!this.shortcutsDisabled && e.ctrlKey) {
-        this.pixelsPerMinuteExponent -= e.deltaY / 800;
-        this.emitChange();
-        e.preventDefault();
-      }
-    }, {passive: false});
+    addEventListener(
+      'wheel',
+      (e: WheelEvent) => {
+        // Ctrl mouse wheel, Ctrl two finger swipe, pinch
+        if (!this.shortcutsDisabled && e.ctrlKey) {
+          this.pixelsPerMinuteExponent -= e.deltaY / 800;
+          this.emitChange();
+          e.preventDefault();
+        }
+      },
+      {passive: false}
+    );
     addEventListener('keydown', (e: KeyboardEvent) => {
       if (!this.shortcutsDisabled && e.ctrlKey && !e.repeat) {
-        if (e.key === '-' || e.key === '_') { // Ctrl -, Ctrl _
+        if (e.key === '-' || e.key === '_') {
+          // Ctrl -, Ctrl _
           this.zoomOutButtonActive = true;
           this.zoomOut();
-          setTimeout(() => this.zoomOutButtonActive = false, 50);
-        } else if (e.key === '+' || e.key === '=') { // Ctrl +, Ctrl =
+          setTimeout(() => (this.zoomOutButtonActive = false), 50);
+        } else if (e.key === '+' || e.key === '=') {
+          // Ctrl +, Ctrl =
           this.zoomInButtonActive = true;
           this.zoomIn();
-          setTimeout(() => this.zoomInButtonActive = false, 50);
+          setTimeout(() => (this.zoomInButtonActive = false), 50);
         }
       }
     });
@@ -82,7 +90,7 @@ export class ZoomControlsComponent implements OnInit {
   emitChange(): void {
     this.pixelsPerMinuteExponentChange.emit(this.pixelsPerMinuteExponent);
     // Emitted value has reduced binary and decimal precision not to brake layout.
-    this.pixelsPerMinuteChange.emit(Math.round(Math.pow(2, this.pixelsPerMinuteExponent) * 128) / 128);
+    this.pixelsPerMinuteChange.emit(Math.round(2 ** this.pixelsPerMinuteExponent * 128) / 128);
   }
 
   get isAbleToZoomIn(): boolean {

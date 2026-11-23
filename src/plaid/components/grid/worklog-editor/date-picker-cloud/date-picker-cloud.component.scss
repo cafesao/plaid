@@ -15,7 +15,10 @@
   border-radius: 20px;
   padding: 5px 0 20px;
   top: -10px;
-  transition: 0.25s opacity, 0.25s top, 0.25s bottom;
+  transition:
+    0.25s opacity,
+    0.25s top,
+    0.25s bottom;
 
   &::before {
     content: ' ';

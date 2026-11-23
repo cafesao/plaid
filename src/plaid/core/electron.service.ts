@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
+import './electron-api';
 
 @Injectable({providedIn: 'root'})
 export class ElectronService {
   get isElectronApp(): boolean {
-    return !!(window && window.electronAPI);
+    return !!window?.electronAPI;
   }
 
   openExternal(url: string): void {

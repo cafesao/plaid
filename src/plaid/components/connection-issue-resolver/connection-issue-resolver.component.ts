@@ -5,7 +5,7 @@ import {User} from '../../model/user';
 import {ConnectionIssueModalVisible} from './connection-issue-modal-visible';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {AppStateService} from '../../core/app-state.service';
-import { Subject } from 'rxjs';
+import {Subject} from 'rxjs';
 
 /**
  * Smart component, contains login, lost connection, and error modals and handles login and reconnect actions.
@@ -14,18 +14,22 @@ import { Subject } from 'rxjs';
   standalone: false,
   selector: 'plaid-connection-issue-resolver',
   templateUrl: './connection-issue-resolver.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./connection-issue-resolver.component.scss']
 })
 export class ConnectionIssueResolverComponent implements OnInit {
   modalVisible: ConnectionIssueModalVisible = ConnectionIssueModalVisible.NONE;
-  authInfo: AuthInfo = { jiraUrl: null, username: null, password: null };
+  authInfo: AuthInfo = {jiraUrl: null, username: null, password: null};
   error: HttpErrorResponse;
   fetching = false;
   startReconnectCountdown = new Subject<void>();
 
   readonly ConnectionIssueModalVisible = ConnectionIssueModalVisible;
 
-  constructor(private authFacade: AuthFacade, private appStateService: AppStateService) {}
+  constructor(
+    private authFacade: AuthFacade,
+    private appStateService: AppStateService
+  ) {}
 
   ngOnInit(): void {
     // Singleton component, no need to unsubscribe
@@ -37,7 +41,7 @@ export class ConnectionIssueResolverComponent implements OnInit {
         this.startReconnectCountdown.next();
       }
     });
-    this.authFacade.getAuthInfo$().subscribe(authInfo => this.authInfo = authInfo || { jiraUrl: null, username: null, password: null });
+    this.authFacade.getAuthInfo$().subscribe(authInfo => (this.authInfo = authInfo || {jiraUrl: null, username: null, password: null}));
   }
 
   errorUpdated(error: HttpErrorResponse): void {

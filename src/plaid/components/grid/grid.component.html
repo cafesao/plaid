@@ -2,7 +2,7 @@
   <div class="grid-header">
     <div class="header-over-labels"></div>
     <div class="header-over-content" *ngFor="let weekday of days">
-      {{ weekday | date:'EEE, LLL d' }}
+      {{ weekday | date: 'EEE, LLL d' }}
     </div>
   </div>
   <div class="working-window-wrapper">
@@ -10,18 +10,12 @@
       class="working-window"
       [style.top.px]="workingHoursStartMinutes * pixelsPerMinute"
       [style.height.px]="(workingHoursEndMinutes - workingHoursStartMinutes) * pixelsPerMinute + 1"
-      [style.left.%]="hideWeekend ? 0 : workingDaysStart * 100 / 7"
-      [style.width.%]="hideWeekend ? 100 : (workingDaysEnd - workingDaysStart + 1) * 100 / 7"
+      [style.left.%]="hideWeekend ? 0 : (workingDaysStart * 100) / 7"
+      [style.width.%]="hideWeekend ? 100 : ((workingDaysEnd - workingDaysStart + 1) * 100) / 7"
     ></div>
   </div>
-  <plaid-grid-background
-    [pixelsPerMinute]="pixelsPerMinute"
-    [numberOfWeekdays]="days.length || 0"
-  ></plaid-grid-background>
-  <plaid-current-time-marker
-    [pixelsPerMinute]="pixelsPerMinute"
-    [dateRange]="dateRange"
-  ></plaid-current-time-marker>
+  <plaid-grid-background [pixelsPerMinute]="pixelsPerMinute" [numberOfWeekdays]="days.length || 0"></plaid-grid-background>
+  <plaid-current-time-marker [pixelsPerMinute]="pixelsPerMinute" [dateRange]="dateRange"></plaid-current-time-marker>
   <div class="worklog-panels-area">
     <div
       class="worklog-panels-area-column"
@@ -45,9 +39,7 @@
     </div>
   </div>
   <div class="grid-footer">
-    <div class="footer-under-labels">
-      &Sigma;
-    </div>
+    <div class="footer-under-labels">&Sigma;</div>
     <div class="footer-under-content" *ngFor="let timeSum of timeSums">
       {{ timeSum }}
     </div>

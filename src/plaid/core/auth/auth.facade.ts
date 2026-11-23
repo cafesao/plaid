@@ -12,20 +12,30 @@ import {AppStateService} from '../app-state.service';
 /**
  * Business logic facade for authentication.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AuthFacade {
-  constructor(private authState: AuthState, private authApi: AuthApi, private appStateService: AppStateService) {
+  constructor(
+    private authState: AuthState,
+    private authApi: AuthApi,
+    private appStateService: AppStateService
+  ) {
     // Handle connection issues
-    this.authState.getError$().pipe(skip(1)).subscribe(error => {
-      if (!this.authState.getAuthenticatedUser() || error && [401, 403].includes(error.status)) { // Authentication error
-        this.authState.setAuthenticatedUser(null);
-        this.appStateService.setConnectionIssueModalVisible(ConnectionIssueModalVisible.LOGIN);
-      } else if (error && error.status === 0) { // Network connection issue
-        this.appStateService.setConnectionIssueModalVisible(ConnectionIssueModalVisible.LOST_CONNECTION);
-      } else if (error) { // Unknown error
-        this.appStateService.setConnectionIssueModalVisible(ConnectionIssueModalVisible.ERROR);
-      }
-    });
+    this.authState
+      .getError$()
+      .pipe(skip(1))
+      .subscribe(error => {
+        if (!this.authState.getAuthenticatedUser() || (error && [401, 403].includes(error.status))) {
+          // Authentication error
+          this.authState.setAuthenticatedUser(null);
+          this.appStateService.setConnectionIssueModalVisible(ConnectionIssueModalVisible.LOGIN);
+        } else if (error && error.status === 0) {
+          // Network connection issue
+          this.appStateService.setConnectionIssueModalVisible(ConnectionIssueModalVisible.LOST_CONNECTION);
+        } else if (error) {
+          // Unknown error
+          this.appStateService.setConnectionIssueModalVisible(ConnectionIssueModalVisible.ERROR);
+        }
+      });
   }
 
   getAuthInfo$(): Observable<AuthInfo> {

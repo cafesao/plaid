@@ -21,12 +21,7 @@ nothing to snap to 5 minutes,
 Shift to snap to 15 minutes,
 Ctrl to snap to 60 minutes."
   >
-    <div
-      #panel
-      class="panel"
-      [style.border-color]="'hsl(' + panelHue + ', ' + panelSaturation + '%, 50%)'"
-      (mousedown)="dragStart($event)"
-    >
+    <div #panel class="panel" [style.border-color]="'hsl(' + panelHue + ', ' + panelSaturation + '%, 50%)'" (mousedown)="dragStart($event)">
       <label>Issue</label>
       <input
         #issuePickerToggle
@@ -39,7 +34,7 @@ Ctrl to snap to 60 minutes."
         (mousedown)="toggleIssuePicker()"
         [class.cloud-open]="issuePickerOpen"
         [tabIndex]="shouldTabIndexBe0() && !worklog?.id ? 0 : -1"
-      >
+      />
       <label>Date</label>
       <input
         #calendarToggle
@@ -52,7 +47,7 @@ Ctrl to snap to 60 minutes."
         [value]="dateString"
         readonly
         [tabIndex]="shouldTabIndexBe0() ? 0 : -1"
-      >
+      />
       <label>Comment</label>
       <textarea
         #commentTextArea
@@ -84,7 +79,9 @@ Ctrl to snap to 60 minutes."
         [disabled]="saving"
         title=""
         [tabIndex]="shouldTabIndexBe0() ? 0 : -1"
-      >Cancel</button>
+      >
+        Cancel
+      </button>
     </div>
 
     <div
@@ -123,10 +120,7 @@ Ctrl to snap to 60 minutes."
     ></plaid-issue-picker-cloud>
   </div>
 
-  <a
-    class="button non-translucent"
-    id="return-button"
-    [class.visible]="!editedPanelInRange"
-    (click)="returnToEditedWorklog()"
-  >Return to edited worklog</a>
+  <a class="button non-translucent" id="return-button" [class.visible]="!editedPanelInRange" (click)="returnToEditedWorklog()"
+    >Return to edited worklog</a
+  >
 </div>

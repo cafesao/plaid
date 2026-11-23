@@ -18,21 +18,21 @@ export interface Issue {
     };
     summary?: string;
     status?: {
-      name: string,
+      name: string;
       statusCategory?: {
         colorName: string;
-      }
-    }
+      };
+    };
   };
-  renderedFields?: {};
+  renderedFields?: Record<string, unknown>;
   properties?: any;
-  names?: {};
-  schema?: {};
+  names?: Record<string, unknown>;
+  schema?: Record<string, unknown>;
   transitions?: any[];
   operations?: any;
   editmeta?: any;
   changelog?: any;
-  versionedRepresentations?: {};
+  versionedRepresentations?: Record<string, unknown>;
   fieldsToInclude?: any;
 
   _favorite?: boolean;

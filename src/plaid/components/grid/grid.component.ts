@@ -1,16 +1,8 @@
-import {
-  AfterViewInit,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  Input,
-  OnInit
-} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit} from '@angular/core';
 import {Worklog} from '../../model/worklog';
 import {DateRange} from '../../model/date-range';
 import {Format} from '../../helpers/format';
-import {User} from 'src/plaid/model/user';
+import {User} from '../../model/user';
 import {WorklogFacade} from '../../core/worklog/worklog.facade';
 
 /**
@@ -66,8 +58,8 @@ export class GridComponent implements OnInit, AfterViewInit {
       clearTimeout(this.timeout);
     }
     const change = ppm / this._pixelsPerMinute;
-    const newScrollTop = change * this.hostElement.nativeElement.scrollTop
-      + (change - 1) * this.hostElement.nativeElement.clientHeight * 0.5;
+    const newScrollTop =
+      change * this.hostElement.nativeElement.scrollTop + (change - 1) * this.hostElement.nativeElement.clientHeight * 0.5;
     const oldGridHeight = this.gridHeight;
     this.gridHeight = 1440 * ppm + GridComponent.GRID_HEADER_AND_FOOTER_COMBINED_HEIGHT;
     if (newScrollTop + this.hostElement.nativeElement.clientHeight > oldGridHeight) {
@@ -94,11 +86,13 @@ export class GridComponent implements OnInit, AfterViewInit {
   set worklogs(worklogs: Worklog[]) {
     if (worklogs && this.authenticatedUser) {
       this._worklogs = worklogs
-        .filter(worklog =>
-          new Date(worklog.started) >= this.dateRange.start &&
-          new Date(worklog.started) < new Date(this.dateRange.end.getTime() + 86400000)
+        .filter(
+          worklog =>
+            new Date(worklog.started) >= this.dateRange.start &&
+            new Date(worklog.started) < new Date(this.dateRange.end.getTime() + 86400000)
           // Worklogs need to be sorted by starting time for the next step.
-        ).sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime());
+        )
+        .sort((a, b) => new Date(a.started).getTime() - new Date(b.started).getTime());
 
       if (this.days && this.days.length > 0) {
         this.days.forEach((weekday: Date, weekdayIndex: number) => {
@@ -136,46 +130,45 @@ export class GridComponent implements OnInit, AfterViewInit {
           const sectionsMaxColumns: number[] = []; // Greatest column number which had to be used in each section
           // In the example the first section is 1 column wide, and the other is 3 columns wide, therefore
           // sectionsMaxColumns = [1, 3].
-          this.worklogs.filter(worklog =>
-            new Date(worklog.started) >= weekday &&
-            new Date(worklog.started) < new Date(weekday.getTime() + 86400000)
-          ).forEach(worklog => {
-            // First step is to find the first column in which a given worklog will fit (the loop will iterate over the
-            // columns in which the worklog doesn't fit).
-            // After processing A: column = 0, columnsLastLogsEndsDates = [10 AM]
-            // After processing B: column = 0, columnsLastLogsEndsDates = [1 PM]
-            // After processing C: column = 1, columnsLastLogsEndsDates = [1 PM, 12 AM]
-            // After processing D: column = 2, columnsLastLogsEndsDates = [1 PM, 12 AM, 1 PM]
-            // After processing E: column = 1, columnsLastLogsEndsDates = [1 PM, 2 PM, 1 PM]
-            let column = 0;
-            while ((columnsLastLogsEndsDates[column] || new Date(0)) > new Date(worklog.started)) {
-              ++column;
-            }
-            columnsLastLogsEndsDates[column] = new Date(new Date(worklog.started).getTime() + worklog.timeSpentSeconds * 1000);
-            // Second step is to figure out how many sections are there and how wide the sections are.
-            // After processing A: lastLogEndDate = 10 AM, sectionsSizes = [1], sectionsMaxColumns = [1]
-            // After processing B: lastLogEndDate = 1 PM,  sectionsSizes = [1, 1], sectionsMaxColumns = [1, 1]
-            // After processing C: lastLogEndDate = 1 PM,  sectionsSizes = [1, 2], sectionsMaxColumns = [1, 2]
-            // After processing D: lastLogEndDate = 1 PM,  sectionsSizes = [1, 3], sectionsMaxColumns = [1, 3]
-            // After processing E: lastLogEndDate = 2 PM,  sectionsSizes = [1, 4], sectionsMaxColumns = [1, 3]
-            if (new Date(worklog.started) < lastLogEndDate) {
-              // If this worklog overlaps with any of the previous - incrementing size and max columns of last section
-              ++sectionsSizes[sectionsSizes.length - 1];
-              if (sectionsMaxColumns[sectionsMaxColumns.length - 1] < column) {
-                sectionsMaxColumns[sectionsMaxColumns.length - 1] = column;
+          this.worklogs
+            .filter(worklog => new Date(worklog.started) >= weekday && new Date(worklog.started) < new Date(weekday.getTime() + 86400000))
+            .forEach(worklog => {
+              // First step is to find the first column in which a given worklog will fit (the loop will iterate over the
+              // columns in which the worklog doesn't fit).
+              // After processing A: column = 0, columnsLastLogsEndsDates = [10 AM]
+              // After processing B: column = 0, columnsLastLogsEndsDates = [1 PM]
+              // After processing C: column = 1, columnsLastLogsEndsDates = [1 PM, 12 AM]
+              // After processing D: column = 2, columnsLastLogsEndsDates = [1 PM, 12 AM, 1 PM]
+              // After processing E: column = 1, columnsLastLogsEndsDates = [1 PM, 2 PM, 1 PM]
+              let column = 0;
+              while ((columnsLastLogsEndsDates[column] || new Date(0)) > new Date(worklog.started)) {
+                ++column;
               }
-            } else {
-              // If this and last work logs do not overlap - new section
-              sectionsSizes.push(1);
-              sectionsMaxColumns.push(column);
-            }
-            if (lastLogEndDate < columnsLastLogsEndsDates[column]) {
-              lastLogEndDate = columnsLastLogsEndsDates[column];
-            }
-            // Going forwards through each worklog gave us the information which column each worklog belongs in, but at
-            // no point were we certain, that a section won't get wider.
-            this.worklogsSplitByDays[weekdayIndex].push({...worklog, _column: column});
-          });
+              columnsLastLogsEndsDates[column] = new Date(new Date(worklog.started).getTime() + worklog.timeSpentSeconds * 1000);
+              // Second step is to figure out how many sections are there and how wide the sections are.
+              // After processing A: lastLogEndDate = 10 AM, sectionsSizes = [1], sectionsMaxColumns = [1]
+              // After processing B: lastLogEndDate = 1 PM,  sectionsSizes = [1, 1], sectionsMaxColumns = [1, 1]
+              // After processing C: lastLogEndDate = 1 PM,  sectionsSizes = [1, 2], sectionsMaxColumns = [1, 2]
+              // After processing D: lastLogEndDate = 1 PM,  sectionsSizes = [1, 3], sectionsMaxColumns = [1, 3]
+              // After processing E: lastLogEndDate = 2 PM,  sectionsSizes = [1, 4], sectionsMaxColumns = [1, 3]
+              if (new Date(worklog.started) < lastLogEndDate) {
+                // If this worklog overlaps with any of the previous - incrementing size and max columns of last section
+                ++sectionsSizes[sectionsSizes.length - 1];
+                if (sectionsMaxColumns[sectionsMaxColumns.length - 1] < column) {
+                  sectionsMaxColumns[sectionsMaxColumns.length - 1] = column;
+                }
+              } else {
+                // If this and last work logs do not overlap - new section
+                sectionsSizes.push(1);
+                sectionsMaxColumns.push(column);
+              }
+              if (lastLogEndDate < columnsLastLogsEndsDates[column]) {
+                lastLogEndDate = columnsLastLogsEndsDates[column];
+              }
+              // Going forwards through each worklog gave us the information which column each worklog belongs in, but at
+              // no point were we certain, that a section won't get wider.
+              this.worklogsSplitByDays[weekdayIndex].push({...worklog, _column: column});
+            });
           this.worklogsSplitByDays[weekdayIndex].forEach(worklog => {
             // After going through every worklog once we know for certain what the sections are. The third step is then
             // to apply this knowledge, so that the worklogs can be displayed with appropriate width and position.
@@ -311,12 +304,10 @@ export class GridComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     const curTime: Date = new Date();
     this.hostElement.nativeElement.scrollTop =
-      (curTime.getHours() * 60 + curTime.getMinutes()) * this.pixelsPerMinute
-      - this.hostElement.nativeElement.offsetHeight * .5;
-    const weekdayWidth: number = (this.hostElement.nativeElement.scrollWidth - 30)
-      / (this.visibleDaysEnd - this.visibleDaysStart + 1);
-    this.hostElement.nativeElement.scrollLeft = (curTime.getDay() - this.visibleDaysStart) * weekdayWidth
-      - (this.hostElement.nativeElement.offsetWidth - weekdayWidth) * .5 + 30;
+      (curTime.getHours() * 60 + curTime.getMinutes()) * this.pixelsPerMinute - this.hostElement.nativeElement.offsetHeight * 0.5;
+    const weekdayWidth: number = (this.hostElement.nativeElement.scrollWidth - 30) / (this.visibleDaysEnd - this.visibleDaysStart + 1);
+    this.hostElement.nativeElement.scrollLeft =
+      (curTime.getDay() - this.visibleDaysStart) * weekdayWidth - (this.hostElement.nativeElement.offsetWidth - weekdayWidth) * 0.5 + 30;
   }
 
   updateVisibleDays(): void {
@@ -325,7 +316,7 @@ export class GridComponent implements OnInit, AfterViewInit {
     this.updateAddHints();
   }
 
-  worklogPanelTrackByFn(index: number, item: Worklog): string {
+  worklogPanelTrackByFn(_index: number, item: Worklog): string {
     return JSON.stringify(item);
   }
 
@@ -339,8 +330,12 @@ export class GridComponent implements OnInit, AfterViewInit {
       // starting time in ascending order).
       this.days.forEach((day: Date, dayIndex: number) => {
         this.addHintsSplitByDays[dayIndex].length = 0;
-        if (this.authenticatedUser != null && day.getDay() >= this.workingDaysStart &&
-          day.getDay() <= this.workingDaysEnd && day < new Date()) {
+        if (
+          this.authenticatedUser != null &&
+          day.getDay() >= this.workingDaysStart &&
+          day.getDay() <= this.workingDaysEnd &&
+          day < new Date()
+        ) {
           let gapStart: Date = new Date(day);
           let gapEnd: Date;
           this.worklogsSplitByDays[dayIndex].forEach(worklog => {
@@ -372,7 +367,7 @@ export class GridComponent implements OnInit, AfterViewInit {
         gapEnd.setHours(Math.floor(this.workingHoursEndMinutes / 60), this.workingHoursEndMinutes % 60);
       }
       const fivemin = 300000; // ms
-      const now = new Date(Math.round(new Date().getTime() / fivemin) * fivemin);
+      const now = new Date(Math.round(Date.now() / fivemin) * fivemin);
       if (gapEnd > now) {
         gapEnd = new Date(gapEnd);
         gapEnd.setHours(now.getHours(), now.getMinutes());
@@ -398,11 +393,12 @@ export class GridComponent implements OnInit, AfterViewInit {
    * and brings up worklog editor in that period.
    */
   addWorklogInTheMiddleOfView(): void {
-    const weekdayWidth: number = (this.hostElement.nativeElement.scrollWidth - 30)
-      / (this.visibleDaysEnd - this.visibleDaysStart + 1);
-    let dayIndex = Math.round((this.hostElement.nativeElement.scrollLeft - 30
-      + (this.hostElement.nativeElement.offsetWidth - weekdayWidth) * .5) / weekdayWidth);
-    if (dayIndex < 0) { // Sanity check
+    const weekdayWidth: number = (this.hostElement.nativeElement.scrollWidth - 30) / (this.visibleDaysEnd - this.visibleDaysStart + 1);
+    let dayIndex = Math.round(
+      (this.hostElement.nativeElement.scrollLeft - 30 + (this.hostElement.nativeElement.offsetWidth - weekdayWidth) * 0.5) / weekdayWidth
+    );
+    if (dayIndex < 0) {
+      // Sanity check
       dayIndex = 0;
     } else if (dayIndex >= this.days.length) {
       dayIndex = this.days.length - 1;
@@ -410,10 +406,11 @@ export class GridComponent implements OnInit, AfterViewInit {
     const date = new Date(this.days[dayIndex]);
     const hour = 60; // minutes
     const quarterHour = 15; // minutes
-    let minutes = (this.hostElement.nativeElement.scrollTop + this.hostElement.nativeElement.offsetHeight * .5)
-      / this.pixelsPerMinute - hour;
+    let minutes =
+      (this.hostElement.nativeElement.scrollTop + this.hostElement.nativeElement.offsetHeight * 0.5) / this.pixelsPerMinute - hour;
     minutes = Math.round(minutes / quarterHour) * quarterHour;
-    if (minutes < 0) { // Sanity check
+    if (minutes < 0) {
+      // Sanity check
       minutes = 0;
     } else if (minutes > 23 * hour) {
       minutes = 23 * hour;

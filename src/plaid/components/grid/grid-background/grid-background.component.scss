@@ -49,22 +49,24 @@
   left: 0;
   width: 100%;
 
-  &:nth-child(6n+1) {
+  &:nth-child(6n + 1) {
     border-top: var(--separator-60min);
     border-bottom: var(--separator-5min);
   }
 
-  &:nth-child(6n+2), &:nth-child(6n+5) {
+  &:nth-child(6n + 2),
+  &:nth-child(6n + 5) {
     border-top: var(--separator-5min);
     border-bottom: var(--separator-15min);
   }
 
-  &:nth-child(6n+3), &:nth-child(6n+6) {
+  &:nth-child(6n + 3),
+  &:nth-child(6n + 6) {
     border-top: var(--separator-5min);
     border-bottom: var(--separator-5min);
   }
 
-  &:nth-child(6n+4) {
+  &:nth-child(6n + 4) {
     border-top: var(--separator-15min);
     border-bottom: var(--separator-5min);
   }

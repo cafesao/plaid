@@ -51,7 +51,10 @@ export class CurrentTimeMarkerComponent implements OnInit {
     return this._dateRange;
   }
 
-  constructor(private sanitizer: DomSanitizer, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     // Marker needs to be updated manually once for the first time, and it will schedule all subsequent updates.
@@ -59,29 +62,28 @@ export class CurrentTimeMarkerComponent implements OnInit {
   }
 
   updateMarker(): void {
-    if (this.timeout != null) { // Prevent multiple timers
+    if (this.timeout != null) {
+      // Prevent multiple timers
       clearTimeout(this.timeout);
     }
     const prevOffsetTop: number = this.markerOffsetTop;
     const prevOffsetLeft: number = this.markerOffsetLeft;
     const prevMinute: number = this.now ? this.now.getMinutes() : null;
     this.now = new Date();
-    if (prevMinute !== this.now.getMinutes()) { // If current minute changed, update label.
+    if (prevMinute !== this.now.getMinutes()) {
+      // If current minute changed, update label.
       this.timeLabel = this.sanitizer.bypassSecurityTrustHtml(Format.time(this.now).replace(':', '<wbr>:'));
       this.today = new Date(this.now.getFullYear(), this.now.getMonth(), this.now.getDate());
     }
     // Update marker vertical position, whether current minute changed or not.
-    this.markerOffsetTop = Math.round((this.now.getTime() - this.today.getTime()) / 60000 * this.pixelsPerMinute);
-    if (this.dateRange) { // Update horizontal position of current date marker.
+    this.markerOffsetTop = Math.round(((this.now.getTime() - this.today.getTime()) / 60000) * this.pixelsPerMinute);
+    if (this.dateRange) {
+      // Update horizontal position of current date marker.
       this.markerOffsetLeft = Math.round((this.today.getTime() - this.dateRange.start.getTime()) / 86400000);
       this.markerVisible = this.markerOffsetLeft >= 0 && this.markerOffsetLeft < this.daysVisible;
     }
     // If any presented property changed (checking the label substituted for checking minute), invoke change detector
-    if (
-      prevMinute !== this.now.getMinutes() ||
-      prevOffsetTop !== this.markerOffsetTop ||
-      prevOffsetLeft !== this.markerOffsetLeft
-    ) {
+    if (prevMinute !== this.now.getMinutes() || prevOffsetTop !== this.markerOffsetTop || prevOffsetLeft !== this.markerOffsetLeft) {
       this.cdr.markForCheck();
     }
     // Schedule next update

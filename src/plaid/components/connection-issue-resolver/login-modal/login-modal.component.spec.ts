@@ -1,11 +1,11 @@
-import { LoginModalComponent } from './login-modal.component';
+import {LoginModalComponent} from './login-modal.component';
 
 describe('LoginModalComponent', () => {
   let component: LoginModalComponent;
 
   beforeEach(() => {
     component = new LoginModalComponent();
-    component.authInfo = { jiraUrl: '', username: '', password: '' };
+    component.authInfo = {jiraUrl: '', username: '', password: ''};
   });
 
   describe('onUrlChange', () => {

@@ -1,4 +1,4 @@
-import { IssueFacade } from './issue.facade';
+import {IssueFacade} from './issue.facade';
 
 describe('IssueFacade', () => {
   describe('stripSpecialChars (via reflection)', () => {
@@ -35,12 +35,12 @@ describe('IssueFacade', () => {
     });
 
     it('should reject invalid issue keys', () => {
-      expect(canPotentiallyBeIssueKey('123-1')).toBe(false);     // starts with number
-      expect(canPotentiallyBeIssueKey('PROJ-0')).toBe(false);     // zero not allowed
-      expect(canPotentiallyBeIssueKey('PROJ-')).toBe(false);      // no number
-      expect(canPotentiallyBeIssueKey('-1')).toBe(false);          // starts with dash
-      expect(canPotentiallyBeIssueKey('PROJ')).toBe(false);        // no dash
-      expect(canPotentiallyBeIssueKey('')).toBe(false);            // empty
+      expect(canPotentiallyBeIssueKey('123-1')).toBe(false); // starts with number
+      expect(canPotentiallyBeIssueKey('PROJ-0')).toBe(false); // zero not allowed
+      expect(canPotentiallyBeIssueKey('PROJ-')).toBe(false); // no number
+      expect(canPotentiallyBeIssueKey('-1')).toBe(false); // starts with dash
+      expect(canPotentiallyBeIssueKey('PROJ')).toBe(false); // no dash
+      expect(canPotentiallyBeIssueKey('')).toBe(false); // empty
     });
   });
 });

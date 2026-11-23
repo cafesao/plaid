@@ -19,6 +19,6 @@ export class ErrorModalComponent {
   @Output() closeModal = new EventEmitter<void>();
 
   get applicationErrorBody(): string {
-    return JSON.stringify(this.error && this.error.error ? this.error.error : null);
+    return JSON.stringify(this.error?.error ? this.error.error : null);
   }
 }

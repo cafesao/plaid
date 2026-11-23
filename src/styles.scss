@@ -25,7 +25,7 @@
   --color-green: #270;
 
   --font-display: Comfortaa, sans-serif;
-  --font-text: "Source Sans Pro", sans-serif;
+  --font-text: 'Source Sans Pro', sans-serif;
 }
 
 body {
@@ -122,7 +122,10 @@ img {
   text-align: center;
   margin: 0 2px;
   border-radius: 15px;
-  transition: 0.1s color, 0.1s background-color, 0.1s box-shadow;
+  transition:
+    0.1s color,
+    0.1s background-color,
+    0.1s box-shadow;
   background-color: transparent;
   border: none;
   font-size: 16px;
@@ -130,8 +133,12 @@ img {
   display: inline-block;
 
   @keyframes progress-on-button {
-    from { background-size: 0%; }
-    to { background-size: 100%; }
+    from {
+      background-size: 0%;
+    }
+    to {
+      background-size: 100%;
+    }
   }
 
   &.progress-10s {
@@ -145,7 +152,8 @@ img {
     padding: 0 15px;
   }
 
-  &.disabled, &[disabled] {
+  &.disabled,
+  &[disabled] {
     color: var(--button-color-low-contrast);
   }
 
@@ -158,9 +166,13 @@ img {
       box-shadow: 0 0 0 2px var(--color-primary-1) inset;
     }
 
-    &:active, &.active {
+    &:active,
+    &.active {
       background-color: var(--button-color-less-translucent);
-      transition: 0.025s color ease-out, 0.025s background-color ease-out, 0.025s box-shadow ease-out;
+      transition:
+        0.025s color ease-out,
+        0.025s background-color ease-out,
+        0.025s box-shadow ease-out;
     }
 
     &.primary {
@@ -176,12 +188,13 @@ img {
         background-color: var(--color-primary-4);
       }
 
-      &:active, &.active {
+      &:active,
+      &.active {
         background-color: var(--color-primary-3);
       }
 
       &.progress-10s {
-        background-image: linear-gradient(to right, var(--color-primary-3), var(--color-primary-3))
+        background-image: linear-gradient(to right, var(--color-primary-3), var(--color-primary-3));
       }
     }
 
@@ -192,7 +205,8 @@ img {
         background-color: var(--color-gray-1);
       }
 
-      &:active, &.active {
+      &:active,
+      &.active {
         background-color: var(--color-gray-2);
       }
     }
@@ -210,7 +224,9 @@ label {
   padding: 5px 0;
 }
 
-input, .input, textarea {
+input,
+.input,
+textarea {
   display: block;
   width: 100%;
   background: rgba(0, 0, 0, 0.05);
@@ -226,7 +242,8 @@ input, .input, textarea {
   resize: none;
   color: #000;
 
-  &.disabled, &[disabled] {
+  &.disabled,
+  &[disabled] {
     color: var(--color-gray-4);
   }
 

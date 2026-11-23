@@ -3,7 +3,7 @@
     *ngIf="markerVisible"
     class="day-marker"
     [style.width.%]="100 / daysVisible"
-    [style.left.%]="100 / daysVisible * markerOffsetLeft"
+    [style.left.%]="(100 / daysVisible) * markerOffsetLeft"
   ></div>
 </div>
 <div class="time-label-wrapper">

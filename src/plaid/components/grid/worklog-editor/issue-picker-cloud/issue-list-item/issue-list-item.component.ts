@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ChangeDetectionStrategy} from '@angular/core';
 import {Issue} from '../../../../../model/issue';
 
 /**
@@ -9,10 +9,10 @@ import {Issue} from '../../../../../model/issue';
   standalone: false,
   selector: 'plaid-issue-list-item',
   templateUrl: './issue-list-item.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./issue-list-item.component.scss']
 })
 export class IssueListItemComponent {
-
   @Input()
   issue: Issue;
 
@@ -35,5 +35,4 @@ export class IssueListItemComponent {
       this.issueSelected.next();
     }
   }
-
 }

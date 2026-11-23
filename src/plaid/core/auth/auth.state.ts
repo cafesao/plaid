@@ -4,20 +4,18 @@ import {HttpErrorResponse} from '@angular/common/http';
 import {AuthInfo} from '../../model/auth-info';
 import {User} from '../../model/user';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AuthState {
   private readonly AUTH_INFO = 'AUTH_INFO';
   private readonly AUTH_HEADER = 'AUTH_HEADER';
 
-  private jiraURL: string = localStorage.getItem(this.AUTH_INFO)
-    ? JSON.parse(localStorage.getItem(this.AUTH_INFO)).jiraUrl
-    : null;
+  private jiraURL: string = localStorage.getItem(this.AUTH_INFO) ? JSON.parse(localStorage.getItem(this.AUTH_INFO)).jiraUrl : null;
   private error = new BehaviorSubject<HttpErrorResponse>(null);
   private authenticatedUser = new BehaviorSubject<User>(null);
   private authInfo = new BehaviorSubject<AuthInfo>(this.getAuthInfo());
 
   static getAuthHeaderKey(authInfo: AuthInfo): string {
-    return 'Basic ' + btoa(authInfo.username + ':' + authInfo.password);
+    return `Basic ${btoa(`${authInfo.username}:${authInfo.password}`)}`;
   }
 
   setAuthInfo(authInfo: AuthInfo): void {

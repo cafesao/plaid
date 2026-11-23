@@ -14,11 +14,15 @@
     #panelInner
     class="panel-inner"
     [class.currently-edited]="currentlyEdited"
-    [ngStyle]="worklog.id ? {
-      maxHeight: panelHeight + 1 + 'px',
-      backgroundColor: 'hsl(' + panelHue + ', ' + (darkMode ? 40 : 60 ) + '%, ' + (darkMode ? 20 : 92 ) + '%)',
-      borderColor: 'hsl(' + panelHue + ', 50%, ' + (darkMode ? 40 : 60 ) + '%)'
-    } : {}"
+    [ngStyle]="
+      worklog.id
+        ? {
+            maxHeight: panelHeight + 1 + 'px',
+            backgroundColor: 'hsl(' + panelHue + ', ' + (darkMode ? 40 : 60) + '%, ' + (darkMode ? 20 : 92) + '%)',
+            borderColor: 'hsl(' + panelHue + ', 50%, ' + (darkMode ? 40 : 60) + '%)'
+          }
+        : {}
+    "
   >
     <div class="panel-content" *ngIf="worklog.id">
       <a
@@ -54,12 +58,9 @@
       <pre class="comment">{{ worklog.comment?.trim() }}</pre>
     </div>
     <div class="panel-content" *ngIf="!worklog.id">
-      <a
-        class="button add-button"
-        title="Add new entry here"
-        (click)="edit.emit()"
-        [style.top.px]="panelHeight / 2 - 15"
-      ><svg class="icon"><use href="assets/icons.svg#plus"></use></svg></a>
+      <a class="button add-button" title="Add new entry here" (click)="edit.emit()" [style.top.px]="panelHeight / 2 - 15"
+        ><svg class="icon"><use href="assets/icons.svg#plus"></use></svg
+      ></a>
     </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {Worklog} from '../model/worklog';
 import {DateRange} from '../model/date-range';
 import {User} from '../model/user';
@@ -17,6 +17,7 @@ import {SystemPreferencesService} from '../core/system-preferences.service';
   standalone: false,
   selector: 'plaid-root',
   templateUrl: './plaid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./plaid.component.scss']
 })
 export class PlaidComponent implements OnInit {
@@ -38,7 +39,7 @@ export class PlaidComponent implements OnInit {
   theme: Theme;
 
   constructor(
-    private systemPreferencesService: SystemPreferencesService, // Injected service early to run its constructor
+    _systemPreferencesService: SystemPreferencesService, // Injected service early to run its constructor
     private authFacade: AuthFacade,
     private worklogFacade: WorklogFacade,
     private appStateService: AppStateService,
@@ -47,21 +48,22 @@ export class PlaidComponent implements OnInit {
 
   ngOnInit(): void {
     // Singleton component, no need to unsubscribe
-    this.authFacade.getAuthenticatedUser$().subscribe(user => this.currentUser = user);
-    this.worklogFacade.getWorklogs$().subscribe(worklogs => this.worklogs = worklogs);
-    this.worklogFacade.getWorklogsFetching$().subscribe(loading => this.loading = loading);
-    this.appStateService.getConnectionIssueModalVisible$()
-      .subscribe(val => this.connectionIssueModalVisible = val !== ConnectionIssueModalVisible.NONE);
-    this.appStateService.getVisibleDateRange$().subscribe(dateRange => this.visibleDateRange = dateRange);
-    this.userPreferencesService.getWorkingHoursStartMinutes$().subscribe(value => this.workingHoursStartMinutes = value);
-    this.userPreferencesService.getWorkingHoursEndMinutes$().subscribe(value => this.workingHoursEndMinutes = value);
-    this.userPreferencesService.getWorkingDaysStart$().subscribe(value => this.workingDaysStart = value);
-    this.userPreferencesService.getWorkingDaysEnd$().subscribe(value => this.workingDaysEnd = value);
-    this.userPreferencesService.getVisibleDaysStart$().subscribe(value => this.visibleDaysStart = value);
-    this.userPreferencesService.getVisibleDaysEnd$().subscribe(value => this.visibleDaysEnd = value);
-    this.userPreferencesService.getHideWeekend$().subscribe(value => this.hideWeekend = value);
-    this.userPreferencesService.getRefreshIntervalMinutes$().subscribe(value => this.refreshIntervalMinutes = value);
-    this.userPreferencesService.getTheme$().subscribe(value => this.theme = value);
+    this.authFacade.getAuthenticatedUser$().subscribe(user => (this.currentUser = user));
+    this.worklogFacade.getWorklogs$().subscribe(worklogs => (this.worklogs = worklogs));
+    this.worklogFacade.getWorklogsFetching$().subscribe(loading => (this.loading = loading));
+    this.appStateService
+      .getConnectionIssueModalVisible$()
+      .subscribe(val => (this.connectionIssueModalVisible = val !== ConnectionIssueModalVisible.NONE));
+    this.appStateService.getVisibleDateRange$().subscribe(dateRange => (this.visibleDateRange = dateRange));
+    this.userPreferencesService.getWorkingHoursStartMinutes$().subscribe(value => (this.workingHoursStartMinutes = value));
+    this.userPreferencesService.getWorkingHoursEndMinutes$().subscribe(value => (this.workingHoursEndMinutes = value));
+    this.userPreferencesService.getWorkingDaysStart$().subscribe(value => (this.workingDaysStart = value));
+    this.userPreferencesService.getWorkingDaysEnd$().subscribe(value => (this.workingDaysEnd = value));
+    this.userPreferencesService.getVisibleDaysStart$().subscribe(value => (this.visibleDaysStart = value));
+    this.userPreferencesService.getVisibleDaysEnd$().subscribe(value => (this.visibleDaysEnd = value));
+    this.userPreferencesService.getHideWeekend$().subscribe(value => (this.hideWeekend = value));
+    this.userPreferencesService.getRefreshIntervalMinutes$().subscribe(value => (this.refreshIntervalMinutes = value));
+    this.userPreferencesService.getTheme$().subscribe(value => (this.theme = value));
   }
 
   setVisibleDateRange(dateRange: DateRange): void {

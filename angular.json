@@ -18,10 +18,7 @@
             "browser": "src/main.ts",
             "polyfills": ["src/polyfills.ts"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              "src/assets/appicon",
-              "src/assets/icons.svg"
-            ],
+            "assets": ["src/assets/appicon", "src/assets/icons.svg"],
             "styles": [
               "src/styles.scss",
               "node_modules/@openfonts/source-sans-pro_all/index.css",
@@ -72,6 +69,16 @@
           "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "plaid:build"
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "plaid:build",
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "polyfills": ["zone.js"],
+            "providersFile": "src/test-providers.ts"
           }
         }
       }
